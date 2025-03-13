@@ -1,3 +1,5 @@
+
+
 @import '../../variables.css';
 
 .auth-page{
@@ -6,7 +8,6 @@
     justify-content: center;
     align-items: stretch; 
     min-height: 100vh; 
-    overflow: hidden;
 }
 
 
@@ -18,6 +19,7 @@
     flex: 1 1 50%; 
     padding-left: 50px; 
     padding-right: 50px; 
+    min-height: 100vh;
 }
 
 
@@ -27,8 +29,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 80%;
-    width: auto;
+    width: 100%;
+    max-width: 600px;
+    min-height: 100vh;
 }
 
 .auth-page-left-container-header{
@@ -39,19 +42,19 @@
     width: 100%;
     height: 29px;
     margin: 0;
-    margin-bottom: 31px;
+    margin-bottom: 2rem;
 
 }
 
 .auth-page-left-container-header-logo{
-    width: 27px;
-    height: 27px;
+    width: 1.68rem;
+    height: 1.68rem;
     margin-right: 7px;
 }
 
 .auth-page-left-container-header-text{
     font-family: var(--font-family);
-    font-size: 24px;
+    font-size: 1.5rem;
     font-style: normal;
     font-weight: 700;
     line-height: 24px;
@@ -79,23 +82,23 @@
 
 .auth-page-left-container-welcome-text{
     font-family: var(--font-family);
-    font-size: 30px;
+    font-size: 2rem;
     font-style: normal;
     font-weight: 700;
     line-height: 30px;
     margin: 0;
-    margin-bottom: 10px;
+    margin-bottom: 1.2rem;
 }
 
 .auth-page-left-container-welcome-p-text{
     font-family: var(--font-family);
     color: var(--text);
-    font-size: 16px;
+    font-size: 1rem;
     font-style: normal;
     font-weight: 400;
     line-height: 16px;
     margin: 0;
-    margin-bottom: 33px;
+    margin-bottom: 2rem;
 
 }
 
@@ -111,7 +114,8 @@
 .auth-page-left-container-form-input-container{
     display: flex;
     flex-direction: column;
-    width: inherit;
+    width: 100%; 
+
     justify-content: center;
     align-items: flex-start;
 }
@@ -119,12 +123,12 @@
     text-align: left;
     font-family: var(--font-family);
     color: var(--text);
-    font-size: 14px;
+    font-size: .9rem;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
     margin: 0;
-    margin-bottom: 10px;
+    margin-bottom: .75rem;
     padding-left: 5px;
 
 }
@@ -132,18 +136,18 @@
 
 .auth-page-left-container-form-input-container-input{
     border: 1px solid #D1D5DB;
+    box-sizing: border-box; 
     border-radius: 8px;
-    width: 100%;
-    max-width:400px;
+    width: 100%; 
     height: 50px;
     background-color: transparent;
     display: flex;
     align-items: center;
     padding-left: 5px;
     font-family: var(--font-family);
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 400;
-    margin-bottom: 17px;
+    margin-bottom: 1rem;
 }
 .auth-page-left-container-form-input-container-input:focus-within{
     border-color: var(--hover-color);
@@ -176,13 +180,13 @@
     display: flex;
     width: 100%;
     justify-content: flex-end;
-    margin-bottom: 18px;
+    margin-bottom: 1.1rem;
 }
 .auth-page-left-container-form-forgot-password{
     color: var(--primary-color);
     text-decoration: none;
     font-family: var(--font-family);
-    font-size: 14px;
+    font-size: .9rem;
     font-style: normal;
     font-weight: 400;
     line-height: 14px;
@@ -205,13 +209,13 @@
     border: none;
     text-align: center;
     font-family: var(--font-family);
-    font-size: 16px;
+    font-size: 1rem;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
     cursor: pointer;
     transition: all .3s ease-in-out;
-    margin-bottom: 17px;
+    margin-bottom: 1.75rem;
 }
 
 .auth-page-left-container-form-submit:hover{
@@ -230,7 +234,7 @@
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 1.75rem;
 
 }
 
@@ -238,13 +242,13 @@
     flex-shrink: 1;
     width: 100%;
     height: 1px;
-    background-color: #D1D5DB;
+    background-color: #b8b8b9;
 }
 
 .auth-page-left-container-form-continue-text{
     font-family: var(--font-family);
     width: 100%;
-    font-size: 14px;
+    font-size:.9rem;
     font-style: normal;
     font-weight: 400;
     min-width: 120px;
@@ -258,13 +262,13 @@
     flex-direction: row;
     width: 100%;
     gap: 16px;
-    margin-bottom: 18px;
+    margin-bottom: 1.1rem;
 }
 
 .auth-page-left-container-form-buttons-button{
     width: 100%;
     height: 48px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid #b8b8b9;
     border-radius: 8px;
     background-color: transparent;
     display: flex;
@@ -274,7 +278,7 @@
     color: #1F2937;
     text-align: center;
     font-family: var(--font-family);
-    font-size: 16px;
+    font-size: 1rem;
     font-style: normal;
     font-weight: 400;
     line-height: 16px;
@@ -354,22 +358,20 @@
     }
 
     .auth-page-left-container{
-        height: 90%;
-        padding-top: 30px;
-        padding-bottom: 30px;
+        padding-top: 50px;
+        padding-bottom: 50px;
 
     }
     .auth-page-left-container-header{
         justify-content: center;
-        margin-bottom: 40px;
     }
     .auth-page-left-container-header-text{
-        font-size: 18px;
+        font-size: 1.5rem;
     }
 
     .auth-page-left-container-header-logo{
-        width: 16px;
-        height: 16px;
+        width: 1.25rem;
+        height: 1.25rem;
     }
 
     .auth-page-left-container-welcome{
@@ -377,15 +379,15 @@
     }
 
     .auth-page-left-container-welcome-text{
-        font-size: 18px;
-        margin-bottom: 8px;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
         text-align: center;
     }
     
     .auth-page-left-container-welcome-p-text{
         text-align: center;
-        font-size: 14px;
-        margin-bottom: 25px;
+        font-size: 1rem;
+        margin-bottom: 2rem;
     }
 
     .auth-page-left-container-form-input-container{
@@ -399,40 +401,41 @@
     .auth-page-left-container-form-input-container-input{
         text-align: center;
         height: 40px;
-        margin-bottom: 25px;
-        font-size: 14px;
+        margin-bottom: 2.25rem;
+        font-size: 1rem;
     }
 
     .auth-page-left-container-form-forgot{
-        margin-top: -10px;
+        margin-top: -1.5rem;
+        margin-bottom: 1.5rem;
     }
     .auth-page-left-container-form-forgot-password{
-        font-size: 11px;
+        font-size: .85rem;
     
     }
 
     .auth-page-left-container-form-submit{
         height: 40px;
-        font-size: 14px;
+        font-size: 1rem;
     }
     .auth-page-left-container-form-continue{
         gap: 10px;
-        margin-bottom: 18px;
+        margin-bottom: 1.25rem;
     
     }
     .auth-page-left-container-form-continue-text{
-        font-size: 12px;
+        font-size: 1rem;
     }
     
     .auth-page-left-container-form-buttons{
         width: 100%;
         gap: 10px;
-        margin-bottom: 18px;
+        margin-bottom: 1.2rem;
     }
     
     .auth-page-left-container-form-buttons-button{
         height: 40px;
-        font-size: 14px;
+        font-size: 1rem;
     }
 
     .auth-page-left-container-form-buttons-button-icon-apple{
@@ -445,15 +448,42 @@
     }
 
     .auth-page-left-container-form-signup{
-        flex-direction: column;
+        flex-direction: row;
     }
     
     .auth-page-left-container-form-signup-text{
-        font-size: 12px;
+        font-size: 1rem;
     }
     
     .auth-page-left-container-form-signup-link{
-        font-size: 12px;
+        font-size: 1rem;
     }
     
+  }
+
+
+  @media (max-width: 511px) {
+    .auth-page-left-container-welcome-p-text{
+        font-size: .8rem;
+    }
+
+    
+    .auth-page-left-container-welcome-text{
+        font-size: 1.65rem;
+    }
+    .auth-page-left-container-form-continue-text{
+        font-size: .75rem;
+    }
+    .auth-page-left-container-form-signup{
+        flex-direction: column;
+    }
+
+    .auth-page-left-container-form-signup-text{
+        font-size: .75rem;
+    }
+
+    .auth-page-left-container-form-signup-link{
+        font-size: .75rem;
+
+    }
   }

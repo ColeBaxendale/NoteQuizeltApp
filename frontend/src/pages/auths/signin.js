@@ -63,7 +63,7 @@ const SignIn = () => {
             <div className="auth-page-left-container">
                 <div className="auth-page-left-container-header">
                     <img src={logo} alt="" className="auth-page-left-container-header-logo"/>
-                    <a href="/" className="auth-page-left-container-header-text" onClick={backToHome}>NoteGenius</a>
+                    <h1 className="auth-page-left-container-header-text" onClick={backToHome}>NoteGenius</h1>
                 </div>
                 <div className="auth-page-left-container-welcome">
                     <h1 className="auth-page-left-container-welcome-text">Welcome Back!</h1>
