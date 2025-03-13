@@ -9,7 +9,7 @@ import ProtectedRoute from "./utils/protected-route";
 const App = () => {
   return (
     <Router>
-      <ToastContainer position="top-right" theme="dark" transition={Slide} autoClose={3000} />
+      <ToastContainer position="top-right" theme="light" transition={Slide} autoClose={3000} />
 
       <Routes>
         <Route path="/signin" element={<SignIn />} />
