@@ -1,0 +1,79 @@
+@import '../../variables.css';
+
+.dashboard{
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background-color: #d0d0d0;
+    
+}
+
+.dashboard-nav{
+    width: 100vw;
+    height: 5rem;
+    background-color:#ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dashboard-nav-container{
+    height: 3rem;
+    margin-left: 4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.dashboard-nav-container2{
+    height: 3rem;
+    margin-right: 4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+
+
+
+.dashboard-nav-container-text{
+    font-family: var(--font-family);
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    margin: 0;
+    color: var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .3s ease-in-out;
+    
+}
+
+.dashboard-nav-container-logo{
+    width: 1.68rem;
+    height: 1.68rem;
+    margin-right: 8px;
+}
+
+.dashboard-nav-container-profile {
+    width: 3rem; 
+    height: 3rem;
+    border-radius: 50%;  /* Creates the circle shape */
+    background-color: var(--primary-color);  /* Circle background color */
+    display: flex;
+    align-items: center;  /* Center content vertically */
+    justify-content: center;  /* Center content horizontally */
+}
+
+.dashboard-nav-container-profile-text {
+    color: white; 
+    font-family: var(--font-family);
+    font-size: 1rem;  
+    margin: 0;  
+}
+

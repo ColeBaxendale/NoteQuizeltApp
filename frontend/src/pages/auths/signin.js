@@ -119,12 +119,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-
-{
-  /* <form className="auth-form" onSubmit={handleLogin} noValidate>
-<input className="input" type="email" placeholder="" disabled={isLoading} value={email} onChange={(e) => setEmail(e.target.value)} />
-<input className="input-password" type="password" disabled={isLoading} placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} />
-<button disabled={isLoading} className={`button ${isLoading ? "loading" : ""}`}>{isLoading ? "Signing in..." : "Sign in"}</button>
-<button className="google-button" disabled={isLoading} type="button" onClick={handleGoogleLogin}></button>
-</form> */
-}
