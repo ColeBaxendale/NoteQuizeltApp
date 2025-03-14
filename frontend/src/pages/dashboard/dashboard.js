@@ -5,6 +5,8 @@ import moon from "../../assets/night-mode.png";
 import card from "../../assets/flash-card.png";
 import ai from "../../assets/ai.png";
 import search from "../../assets/search.png";
+import crown from "../../assets/crown.png";
+
 
 import rightArrow from "../../assets/right-arrow.png";
 import React, { useEffect, useState } from "react";
@@ -48,6 +50,10 @@ const Dashboard = () => {
             <button className="dashboard-nav-container2-button" onClick={handleUpgrade}>
               Get Premium
             </button>
+          )}
+            {user && user.isPremium && (
+            <img src={crown} alt="" className="dashboard-nav-container-logo-prem" />
+
           )}
           <div className="dashboard-nav-container-profile">
             <p className="dashboard-nav-container-profile-text">{user ? user.email.slice(0, 2).toUpperCase() : ""}</p>
