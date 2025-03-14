@@ -5,6 +5,8 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 require('./config/passport'); 
 const authRoutes = require('./routes/authRoutes');
+const deckRoutes = require('./routes/deckRoutes');
+
 
 
 require('dotenv').config();
@@ -24,6 +26,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use('/auth', authRoutes);
+app.use('/deck', deckRoutes);
+
 
 
 // ✅ MongoDB connection
