@@ -95,7 +95,7 @@ const Dashboard = () => {
           <div className="tempset">
           <div className="tempset-left">
                 <h2 className="tempset-left-title">EMT Notes</h2>
-                <h2 className="tempset-left-text">Notes </h2>
+                <h2 className="tempset-left-text">Notes Summary </h2>
               </div>
               <p className="tempset-time">March 7, 2025</p>
           </div>
