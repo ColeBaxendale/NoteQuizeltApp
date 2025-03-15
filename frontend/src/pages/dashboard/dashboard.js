@@ -7,7 +7,6 @@ import ai from "../../assets/ai.png";
 import search from "../../assets/search.png";
 import crown from "../../assets/crown.png";
 
-
 import rightArrow from "../../assets/right-arrow.png";
 import React, { useEffect, useState } from "react";
 import axios from "axios"; // or use fetch API
@@ -18,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [decks, setDecks] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,8 +34,32 @@ const Dashboard = () => {
     fetchUser();
   }, [navigate]);
 
+
+  useEffect(() => {
+    // Fetch the user's decks only if the user is logged in
+    if (user) {
+      const fetchDecks = async () => {
+        try {
+          const response = await API.get("/deck/user-decks");
+          // Sort decks by updatedAt descending (most recent first)
+          const sortedDecks = response.data.decks.sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
+          setDecks(sortedDecks);
+        } catch (err) {
+          console.error("Failed to fetch decks:", err);
+        }
+      };
+      fetchDecks();
+    }
+  }, [user]);
+
   const handleUpgrade = () => {
     console.log("stripe");
+  };
+  
+  const createFlashCardSet = () => {
+    navigate("/create-flashcards");
   };
 
   return (
@@ -51,10 +75,7 @@ const Dashboard = () => {
               Get Premium
             </button>
           )}
-            {user && user.isPremium && (
-            <img src={crown} alt="" className="dashboard-nav-container-logo-prem" />
-
-          )}
+          {user && user.isPremium && <img src={crown} alt="" className="dashboard-nav-container-logo-prem" />}
           <div className="dashboard-nav-container-profile">
             <p className="dashboard-nav-container-profile-text">{user ? user.email.slice(0, 2).toUpperCase() : ""}</p>
           </div>
@@ -64,7 +85,7 @@ const Dashboard = () => {
         <h2 className="dashboard-content-welcome">Welcome back!</h2>
         <p className="dashboard-content-text">Convert your notes into interactive learning material!</p>
         <div className="dashboard-content-first-container">
-          <div className="dashboard-content-first-container-box">
+          <div className="dashboard-content-first-container-box" onClick={createFlashCardSet}>
             <div className="dashboard-content-first-container-box-icons">
               <div className="dashboard-content-first-container-box-icons-box">
                 <img src={card} alt="" className="dashboard-content-first-container-box-icons-box-icon" />
@@ -85,20 +106,25 @@ const Dashboard = () => {
         </div>
         <h2 className="dashboard-content-sets-text">My Study Sets</h2>
         <div className="dashboard-content-sets-sets">
-          <div className="tempset">
-              <div className="tempset-left">
-                <h2 className="tempset-left-title">Chemistry Chapter 5</h2>
-                <h2 className="tempset-left-text">Flashcards - 34 Cards</h2>
+          {decks.length > 0 ? (
+            decks.map((deck) => (
+              <div className="tempset" key={deck._id}>
+                <div className="tempset-left">
+                  <h2 className="tempset-left-title">{deck.title}</h2>
+                  <h2 className="tempset-left-text">{deck.description}</h2>
+                </div>
+                <p className="tempset-time">
+                  {new Date(deck.updatedAt).toLocaleDateString()}
+                </p>
               </div>
-              <p className="tempset-time">2 Hours Ago</p>
-          </div>
-          <div className="tempset">
-          <div className="tempset-left">
-                <h2 className="tempset-left-title">EMT Notes</h2>
-                <h2 className="tempset-left-text">Notes Summary </h2>
-              </div>
-              <p className="tempset-time">March 7, 2025</p>
-          </div>
+            ))
+          ) : (
+            <div className="no-sets">
+              <p>
+                You haven't created any study sets yet. Click an option above to get started!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

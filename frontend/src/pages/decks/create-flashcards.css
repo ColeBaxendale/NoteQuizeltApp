@@ -1,0 +1,278 @@
+@import '../../variables.css';
+
+.create-flashcard{
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background-color: #f9fafb;
+}
+
+.create-flashcard-nav{
+    width: 100vw;
+    height: 5rem;
+    background-color:#ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.create-flashcard-nav-container{
+    height: 3rem;
+    margin-left: 4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.create-flashcard-nav-container2{
+    height: 3rem;
+    margin-right: 4rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+
+
+
+.create-flashcard-nav-container-text{
+    font-family: var(--font-family);
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    margin: 0;
+    color: var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .3s ease-in-out;
+    
+}
+
+.create-flashcard-nav-container-logo{
+    width: 1.68rem;
+    height: 1.68rem;
+    margin-right: 8px;
+}
+
+.create-flashcard-nav-container-logo-prem{
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 1rem;
+}
+
+.create-flashcard-nav-container-profile {
+    width: 2.5rem; 
+    height: 2.5rem;
+    border-radius: 50%;  /* Creates the circle shape */
+    background-color: var(--primary-color);  /* Circle background color */
+    display: flex;
+    align-items: center;  /* Center content vertically */
+    justify-content: center;  /* Center content horizontally */
+    cursor: pointer;
+}
+
+.create-flashcard-nav-container-profile:hover{
+    background-color: var(--hover-color);
+}
+
+.create-flashcard-nav-container-profile-text {
+    color: white; 
+    font-family: var(--font-family);
+    font-size: 1rem;  
+    margin: 0;  
+}
+
+.create-flashcard-nav-container2-button{
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: .7rem;
+    margin-right: 1rem;
+    height: 2rem;
+    width: 6rem;
+    background-color: var(--accent-color);
+    color: var(--text);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .25s ease-in-out;
+}
+
+.create-flashcard-nav-container2-button:hover{
+    border: 1px solid var(--primary-color);
+
+}
+
+.create-flashcard-nav-container3-button{
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: .7rem;
+    margin-right: 2rem;
+    height: 2rem;
+    width: 6rem;
+    background-color: var(--accent-color);
+    color: var(--text);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .25s ease-in-out;
+}
+
+.create-flashcard-content{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 4rem;
+    box-sizing: border-box;
+}
+
+
+.create-flashcard-content-title-container{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 2rem;
+}
+
+.create-flashcard-content-title-container-header{
+    margin: 0;
+    font-family: var(--font-family);
+    color: var(--text);
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.create-flashcard-content-title-container-secondary{
+    margin: 0;
+    font-family: var(--font-family);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 200;
+}
+
+.create-flashcard-content-notes{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.create-flashcard-content-notes-textarea{
+    resize: none;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 8px;
+    outline: none;
+    border: 1px solid rgb(205, 204, 204);
+    box-sizing: border-box;
+    height: 20rem;
+    padding: 1rem;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+
+    
+}
+
+.create-flashcard-content-notes-title{
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 8px;
+    outline: none;
+    border: 1px solid rgb(205, 204, 204);
+    box-sizing: border-box;
+    padding: 1rem;
+    height: 3rem;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+}
+
+.create-flashcard-content-notes-label{
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.create-flashcard-content-notes-label-text{
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 200;
+    margin-bottom: .7rem;
+}
+
+.create-flashcard-content-bottom{
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+
+}
+
+.create-flashcard-content-bottom-button{
+    width: 100%;
+    max-width: 150px;
+    height: 3rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid rgb(205, 204, 204);
+    background-color: white;
+    margin-right: 1.5rem;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 200;
+    transition: all .25s ease-in-out;
+
+}
+
+.create-flashcard-content-bottom-button:hover{
+    background-color: rgb(205, 204, 204);
+}
+
+.create-flashcard-content-bottom-button1{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 300px;
+    height: 3rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background-color: var(--primary-color);
+    color: white;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 200;
+    transition: all .25s ease-in-out;
+
+}
+.create-flashcard-content-bottom-button1:hover{
+    background-color: var(--hover-color);
+
+}
+
+.create-flashcard-content-bottom-button1-logo{
+    width: 1rem;
+    height: 1rem;
+    filter: invert(1);
+    margin-right: 6px;
+
+}
+
+
+
+

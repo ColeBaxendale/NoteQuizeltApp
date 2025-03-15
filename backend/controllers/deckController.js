@@ -12,6 +12,7 @@ exports.createDeck = async (req, res) => {
         title,
         content,
         user: req.user.userId,
+        description: "Blank Set",
         updatedAt: Date.now()
       });
   
@@ -23,6 +24,20 @@ exports.createDeck = async (req, res) => {
       });
     } catch (error) {
       console.error("Error creating deck:", error);
+      return res.status(500).json({ message: error.message });
+    }
+  };
+
+
+  exports.getUserDecks = async (req, res) => {
+    try {
+      // Get userId from the authenticated request (set by auth middleware)
+      const userId = req.user.userId;
+      // Find decks for this user, selecting only the title and updatedAt fields
+      const decks = await Deck.find({ user: userId }).select('title description updatedAt');
+      return res.status(200).json({ decks });
+    } catch (error) {
+      console.error("Error fetching decks:", error);
       return res.status(500).json({ message: error.message });
     }
   };

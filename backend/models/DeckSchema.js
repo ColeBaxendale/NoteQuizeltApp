@@ -10,6 +10,10 @@ const deckSchema = new Schema({
     type: String 
   },
 
+  description: {
+    type: String 
+  },
+
   user: { 
     type: Schema.Types.ObjectId, 
     ref: 'User', 
