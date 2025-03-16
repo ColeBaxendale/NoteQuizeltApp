@@ -12,7 +12,7 @@ router.get('/user', authenticateToken, authController.getUser);
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
-    const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ userId: req.user._id, isPremium: req.user.isPremium  }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.cookie('token', token, {
         httpOnly: true,

@@ -6,7 +6,7 @@ const authMiddleware = require('../config/authMiddleware');
 require('dotenv').config();
 
 // Create a new deck (existing route)
-router.post('/create-deck', authMiddleware, deckController.createDeck);
+router.post('/create-deck', authMiddleware, deckController.createDeckWithFlashcards);
 
 // Get all decks for the logged-in user
 router.get('/user-decks', authMiddleware, deckController.getUserDecks);

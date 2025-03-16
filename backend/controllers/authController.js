@@ -33,7 +33,7 @@ exports.register = async (req, res) => {
         await user.save();
 
         // ✅ Generate JWT Token
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
+        const token = jwt.sign({ userId: user._id, isPremium: user.isPremium }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -65,8 +65,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        const token = jwt.sign({ userId: user._id, isPremium: user.isPremium }, process.env.JWT_SECRET, { expiresIn: "24h" });
         res.cookie('token', token, {
             httpOnly: true,
             sameSite: 'strict',
@@ -89,6 +88,7 @@ exports.getUser = async (req, res) => {
         res.status(200).json({
             userId: user._id,
             email: user.email,
+            isPremium: user.isPremium,
         });
         
     } catch (error) {
