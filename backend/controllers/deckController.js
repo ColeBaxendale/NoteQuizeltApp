@@ -1,9 +1,9 @@
 // backend/controllers/deckController.js
-const Deck = require('../models/DeckSchema');
-const Flashcard = require('../models/FlashCardSchema');
-const axios = require('axios');
+const Deck = require("../models/DeckSchema");
+const Flashcard = require("../models/FlashCardSchema");
+const axios = require("axios");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config();
+require("dotenv").config();
 
 const GEMINI_API_URL = process.env.GEMINI_API_URL;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -16,40 +16,39 @@ const MAX_CHAR_PREMIUM = 100000;
 
 async function generateFlashcardsFromNotes(notes, isPremium) {
   try {
-    console.log(isPremium);
-    
+
     // Build prompt
-    const prompt = isPremium 
+    const prompt = isPremium
       ? `You are teaching first time students in this subject, make their notes easy to understand and generate question to answer flashcards from them. Return a valid JSON array of objects (each object having a 'question' and 'answer') without any markdown formatting, code fences, or extra characters. Notes: ${notes}`
       : `You are teaching first time students in this subject, make their notes easy to understand and generate question to answer flashcards from them. Return a valid JSON array of objects (each object having a 'question' and 'answer') without any markdown formatting, code fences, or extra characters. Limit the output to at most 50 flashcards. Notes: ${notes}`;
-    
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
 
-    
     let generatedText = result.response.text();
-    
+
     // Remove Markdown code fences if present
     if (generatedText.startsWith("```")) {
       const firstNewlineIndex = generatedText.indexOf("\n");
       generatedText = generatedText.substring(firstNewlineIndex + 1);
       generatedText = generatedText.replace(/```$/, "").trim();
     }
-    
+
     // Sanitize control characters that might be causing JSON parsing issues
     generatedText = generatedText.replace(/[\x00-\x1F\x7F]/g, "");
-    
+
     // Now try parsing the cleaned JSON string
-    const flashcards = JSON.parse(generatedText);
+    let flashcards = JSON.parse(generatedText);
+    if (!isPremium && flashcards.length > 50) {
+      flashcards = flashcards.slice(0, 50);
+    }
     return flashcards;
   } catch (error) {
     console.error("Error generating flashcards:", error);
     return [];
   }
 }
-
 
 exports.createDeckWithFlashcards = async (req, res) => {
   try {
@@ -72,7 +71,7 @@ exports.createDeckWithFlashcards = async (req, res) => {
       user: userId,
       description: "Flashcards", // temporary description
       flashcards: [],
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     });
     await newDeck.save();
 
@@ -80,18 +79,18 @@ exports.createDeckWithFlashcards = async (req, res) => {
     const generatedFlashcards = await generateFlashcardsFromNotes(content, req.user.isPremium);
 
     // 3. Create flashcards in bulk, associating them with the deck's _id
-    const flashcardsToInsert = generatedFlashcards.map(card => ({
+    const flashcardsToInsert = generatedFlashcards.map((card) => ({
       question: card.question,
       answer: card.answer,
       user: userId,
       deck: newDeck._id,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     }));
 
     const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
 
     // 4. Update the deck with the flashcard IDs and description including count
-    newDeck.flashcards = insertedFlashcards.map(fc => fc._id);
+    newDeck.flashcards = insertedFlashcards.map((fc) => fc._id);
     newDeck.description = `Flashcards - ${insertedFlashcards.length} cards`;
     await newDeck.save();
 
@@ -109,7 +108,7 @@ exports.createDeckWithFlashcards = async (req, res) => {
 exports.getUserDecks = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const decks = await Deck.find({ user: userId }).select('title description updatedAt');
+    const decks = await Deck.find({ user: userId }).select("title description updatedAt");
     return res.status(200).json({ decks });
   } catch (error) {
     console.error("Error fetching decks:", error);

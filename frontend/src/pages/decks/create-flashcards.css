@@ -222,6 +222,16 @@
 
 }
 
+.create-flashcard-content-bottom2{
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
 .create-flashcard-content-botttom-characters{
     margin: 0;
     margin-bottom: 1.5rem;
@@ -231,6 +241,18 @@
     font-weight: 200;
 
 }
+
+.create-flashcard-content-botttom-characters1{
+    margin: 0;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-family);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 200;
+    color: var(--primary-color);
+
+}
+
 
 .create-flashcard-content-botttom-characters.too-many{
    color: red;

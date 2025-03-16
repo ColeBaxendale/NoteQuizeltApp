@@ -131,54 +131,29 @@ const CreateFlashCards = () => {
               Get Premium
             </button>
           )}
-          {user && user.isPremium && (
-            <img src={crown} alt="Premium" className="create-flashcard-nav-container-logo-prem" />
-          )}
+          {user && user.isPremium && <img src={crown} alt="Premium" className="create-flashcard-nav-container-logo-prem" />}
           <div className="create-flashcard-nav-container-profile">
-            <p className="create-flashcard-nav-container-profile-text">
-              {user ? user.email.slice(0, 2).toUpperCase() : ""}
-            </p>
+            <p className="create-flashcard-nav-container-profile-text">{user ? user.email.slice(0, 2).toUpperCase() : ""}</p>
           </div>
         </div>
       </div>
       <div className="create-flashcard-content">
         <div className="create-flashcard-content-title-container">
           <h1 className="create-flashcard-content-title-container-header">Transform Your Notes</h1>
-          <p className="create-flashcard-content-title-container-secondary">
-            Paste your notes below to generate flashcards
-          </p>
+          <p className="create-flashcard-content-title-container-secondary">Paste your notes below to generate flashcards</p>
         </div>
         <div className="create-flashcard-content-notes">
           <div className="create-flashcard-content-notes-label">
-            <label className="create-flashcard-content-notes-label-text">
-              Study Set Title
-            </label>
+            <label className="create-flashcard-content-notes-label-text">Study Set Title</label>
           </div>
-          <input
-            className="create-flashcard-content-notes-title"
-            type="text"
-            placeholder="Enter a title for this set."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          <input className="create-flashcard-content-notes-title" type="text" placeholder="Enter a title for this set." value={title} onChange={(e) => setTitle(e.target.value)} />
           <div className="create-flashcard-content-notes-label">
-            <label className="create-flashcard-content-notes-label-text">
-              Your Notes
-            </label>
+            <label className="create-flashcard-content-notes-label-text">Your Notes</label>
           </div>
-          <textarea
-            className="create-flashcard-content-notes-textarea"
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Paste your notes here..."
-            maxLength={currentLimit}
-          />
-          <div className="create-flashcard-content-bottom">
-            <p
-              className={`create-flashcard-content-botttom-characters ${
-                notes.length >= currentLimit ? "too-many" : ""
-              }`}
-            >
+          <textarea className="create-flashcard-content-notes-textarea" value={notes} onChange={handleNotesChange} placeholder="Paste your notes here..." maxLength={currentLimit} />
+          <div className={user && user.isPremium ? "create-flashcard-content-bottom" : "create-flashcard-content-bottom2"}>
+            {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1">Free accounts are limited to 50 flashcards. Upgrade for unlimited flashcards.</p>}
+            <p className={`create-flashcard-content-botttom-characters ${notes.length >= currentLimit ? "too-many" : ""}`}>
               {notes.length}/{currentLimit} Characters
             </p>
           </div>
