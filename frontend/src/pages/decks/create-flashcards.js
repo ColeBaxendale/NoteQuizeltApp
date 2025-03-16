@@ -1,15 +1,8 @@
 import "./create-flashcards.css";
 import logo from "../../assets/logo.png";
-import sun from "../../assets/brightness.png";
-import moon from "../../assets/night-mode.png";
-import card from "../../assets/flash-card.png";
-import ai from "../../assets/ai.png";
-import search from "../../assets/search.png";
 import crown from "../../assets/crown.png";
 import Swal from "sweetalert2";
-import rightArrow from "../../assets/right-arrow.png";
 import wand from "../../assets/wand.png";
-import information from "../../assets/information.png";
 import React, { useEffect, useState } from "react";
 import API from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";

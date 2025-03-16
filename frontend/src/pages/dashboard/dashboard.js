@@ -1,15 +1,9 @@
 import "./dashboard.css";
 import logo from "../../assets/logo.png";
-import sun from "../../assets/brightness.png";
-import moon from "../../assets/night-mode.png";
 import card from "../../assets/flash-card.png";
 import ai from "../../assets/ai.png";
-import search from "../../assets/search.png";
 import crown from "../../assets/crown.png";
-
-import rightArrow from "../../assets/right-arrow.png";
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // or use fetch API
 import API from "../../utils/api.js";
 
 import { useNavigate } from "react-router-dom";

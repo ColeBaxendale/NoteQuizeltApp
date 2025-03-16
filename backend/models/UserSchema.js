@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
   stripeSubscriptionId: { type: String, default: null },
   isOAuth: { type: Boolean, default: false },
   googleId: { type: String, default: null },
-  isDarkTheme: { type: Boolean, default: false },
   
 });
 
