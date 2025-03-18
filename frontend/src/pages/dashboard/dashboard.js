@@ -56,6 +56,10 @@ const Dashboard = () => {
     navigate("/create-flashcards");
   };
 
+  const createSummary = () => {
+    navigate("/create-summary");
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-nav">
@@ -88,7 +92,7 @@ const Dashboard = () => {
             <h2 className="dashboard-content-first-container-box-icons-box-header">Create Flashcard Set</h2>
             <p className="dashboard-content-first-container-box-icons-box-content">Transform your notes into interactive flashcards for effective memorization.</p>
           </div>
-          <div className="dashboard-content-first-container-box">
+          <div className="dashboard-content-first-container-box" onClick={createSummary}>
             <div className="dashboard-content-first-container-box-icons">
               <div className="dashboard-content-first-container-box-icons-box">
                 <img src={ai} alt="" className="dashboard-content-first-container-box-icons-box-icon" />

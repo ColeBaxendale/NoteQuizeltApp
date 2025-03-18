@@ -16,10 +16,7 @@ const summarizationSchema = new Schema({
     ref: 'Deck', 
     required: true 
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+
 });
 
 const Summarization = mongoose.model('Summarization', summarizationSchema);

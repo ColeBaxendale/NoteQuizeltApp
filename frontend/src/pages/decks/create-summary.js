@@ -10,13 +10,15 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
-const CreateFlashCards = () => {
+const CreateSummary = () => {
   const [user, setUser] = useState(null);
   const [notes, setNotes] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isExamEssentials, setIsExamEssentials] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState("simple");
+  const [selectedTone, setSelectedTone] = useState("simple");
+    const [isExamEssentials, setIsExamEssentials] = useState(false);
+  
+  
 
   const navigate = useNavigate();
 
@@ -81,7 +83,7 @@ const CreateFlashCards = () => {
   // Determine the current limit, default to free limit if user not loaded yet
   const currentLimit = user ? (user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE) : MAX_CHAR_FREE;
 
-  const handleGenerateFlashcards = async () => {
+  const handleGenerateSummary = async () => {
     if (!title.trim()) {
       toast.error("Please enter a title for the study set.");
       return;
@@ -104,15 +106,15 @@ const CreateFlashCards = () => {
         content: notes,
         settings: {
           examEssentials: isExamEssentials,
-          flashcardStyle: selectedStyle,
+          summaryTone: selectedTone,
         },
       };
-      const response = await API.post("/deck/create-deck-flashcards", payload);
+      const response = await API.post("/deck/create-deck-summary", payload);
       toast.success(response.data.message || `${title} created successfully`);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error generating flashcards:", error);
-      toast.error(error.response?.data?.message || "An error occurred while generating flashcards.");
+      console.error("Error generating summary:", error);
+      toast.error(error.response?.data?.message || "An error occurred while generating summary.");
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +129,7 @@ const CreateFlashCards = () => {
           <div className="loading-content">
             {/* You can replace the below div with an actual spinner icon/image */}
             <div className="spinner"></div>
-            <p>Generating Your Flashcards, this may take a minute</p>
+            <p>Generating Your Summary, this may take a minute</p>
           </div>
         </div>
       )}
@@ -158,7 +160,7 @@ const CreateFlashCards = () => {
 
               <textarea className="create-flashcard-content-notes-textarea" value={notes} onChange={handleNotesChange} placeholder="Paste your notes here..." maxLength={currentLimit} />
               <div className={user && user.isPremium ? "create-flashcard-content-bottom" : "create-flashcard-content-bottom2"}>
-                {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1">Free accounts are limited to 50 flashcards per set.</p>}
+                {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1">Free accounts are limited to 2 pages per set.</p>}
                 <p className={`create-flashcard-content-botttom-characters ${notes.length >= currentLimit ? "too-many" : ""}`}>
                   {notes.length}/{currentLimit} Characters
                 </p>
@@ -168,40 +170,40 @@ const CreateFlashCards = () => {
           <div className="create-flashcard-content-container-right">
             <div className="create-flashcard-content-container-left-title">
               <div className="flashcard-settings-header">
-                <label className="create-flashcard-content-notes-label-settings">Flashcard Settings</label>
+                <label className="create-flashcard-content-notes-label-settings">Summary Settings</label>
                 {!user?.isPremium && <i className="fas fa-lock lock-icon"></i>}
               </div>
               {/* Exam Essentials */}
               <div className={`exam-mode-box ${!user?.isPremium ? "disabled-section" : ""}`}>
                 <div className="exam-mode-box-two">
-                  <label className="create-flashcard-content-notes-label-header">Exam Essentials</label>
-                  <label className="create-flashcard-content-notes-label-desc">Focuses on key concepts and definitions, perfect for last second exam preparation</label>
+                <label className="create-flashcard-content-notes-label-header">Exam Essentials</label>
+                <label className="create-flashcard-content-notes-label-desc">Focuses on key concepts and definitions, perfect for last second exam preparation</label>
                 </div>
                 <label className="switch">
-                  <input type="checkbox" checked={isExamEssentials} onChange={() => user?.isPremium && setIsExamEssentials(!isExamEssentials)} disabled={!user?.isPremium} />
+                <input type="checkbox" checked={isExamEssentials} onChange={() => user?.isPremium && setIsExamEssentials(!isExamEssentials)} disabled={!user?.isPremium} />
+
                   <span className="slider round"></span>
                 </label>
               </div>
 
               {/* Flashcard Style */}
-              <label className={`create-flashcard-content-notes-label-header ${!user?.isPremium ? "disabled-label" : ""}`}>Flashcard Style</label>
-              <label className={`create-flashcard-content-notes-label-desc2 ${!user?.isPremium ? "disabled-label" : ""}`}>Select the style of flashcards you would like to create</label>
+              <label className={`create-flashcard-content-notes-label-header ${!user?.isPremium ? "disabled-label" : ""}`}>Summary Tone</label>
+              <label className={`create-flashcard-content-notes-label-desc2 ${!user?.isPremium ? "disabled-label" : ""}`}>Select the tone of the summary you would like to create</label>
               <div className={`flashcard-settings ${!user?.isPremium ? "disabled-section" : ""}`}>
-                {["simple", "detailed", "fill", "mnemonics"].map((style) => (
-                  <label className="selector-option" key={style}>
-                    <input type="radio" name="flashcardStyle" value={style} checked={selectedStyle === style} onChange={() => user?.isPremium && setSelectedStyle(style)} disabled={!user?.isPremium} />
-                    {style === "simple" && "Simple Q&A"}
-                    {style === "detailed" && "Detailed Explanation"}
-                    {style === "fill" && "Fill-in-the-Blank"}
-                    {style === "mnemonics" && "Mnemonics"}
+                {["simple", "casual", "academic"].map((tone) => (
+                  <label className="selector-option" key={tone}>
+                    <input type="radio" name="flashcardStyle" value={tone} checked={selectedTone === tone} onChange={() => user?.isPremium && setSelectedTone(tone)} disabled={!user?.isPremium} />
+                    {tone === "simple" && "Simplified"}
+                    {tone === "casual" && "Casual"}
+                    {tone === "academic" && "Academic"}
                   </label>
                 ))}
               </div>
 
               {/* Buttons */}
-              <button className="create-flashcard-content-bottom-button1" onClick={handleGenerateFlashcards}>
+              <button className="create-flashcard-content-bottom-button1" onClick={handleGenerateSummary}>
                 <img src={wand} alt="Generate" className="create-flashcard-content-bottom-button1-logo" />
-                Generate Flashcards
+                Generate Summary
               </button>
               <button className="create-flashcard-content-bottom-button" onClick={handleBack}>
                 Cancel
@@ -224,4 +226,4 @@ const CreateFlashCards = () => {
   );
 };
 
-export default CreateFlashCards;
+export default CreateSummary;

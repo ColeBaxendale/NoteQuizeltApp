@@ -6,6 +6,7 @@ import { ToastContainer, Slide } from "react-toastify";
 import Dashboard from "./pages/dashboard/dashboard";
 import ProtectedRoute from "./utils/protected-route";
 import CreateFlashCards from "./pages/decks/create-flashcards";
+import CreateSummary from "./pages/decks/create-summary";
 
 const App = () => {
   return (
@@ -17,6 +18,8 @@ const App = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={ <ProtectedRoute> <Dashboard /> </ProtectedRoute>}/>
         <Route path="/create-flashcards" element={ <ProtectedRoute> <CreateFlashCards /> </ProtectedRoute>}/>
+        <Route path="/create-summary" element={ <ProtectedRoute> <CreateSummary /> </ProtectedRoute>}/>
+
 
       </Routes>
     </Router>
