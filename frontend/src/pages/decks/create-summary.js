@@ -16,7 +16,9 @@ const CreateSummary = () => {
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTone, setSelectedTone] = useState("simple");
-    const [isExamEssentials, setIsExamEssentials] = useState(false);
+  const [isExamEssentials, setIsExamEssentials] = useState(false);
+  const [isCaseStudyMode, setIsCaseStudyMode] = useState(false);
+
   
   
 
@@ -160,7 +162,7 @@ const CreateSummary = () => {
 
               <textarea className="create-flashcard-content-notes-textarea" value={notes} onChange={handleNotesChange} placeholder="Paste your notes here..." maxLength={currentLimit} />
               <div className={user && user.isPremium ? "create-flashcard-content-bottom" : "create-flashcard-content-bottom2"}>
-                {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1">Free accounts are limited to 2 pages per set.</p>}
+                {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1"> Free accounts are limited to generating summaries up to 2 pages per set.</p>}
                 <p className={`create-flashcard-content-botttom-characters ${notes.length >= currentLimit ? "too-many" : ""}`}>
                   {notes.length}/{currentLimit} Characters
                 </p>
@@ -181,7 +183,17 @@ const CreateSummary = () => {
                 </div>
                 <label className="switch">
                 <input type="checkbox" checked={isExamEssentials} onChange={() => user?.isPremium && setIsExamEssentials(!isExamEssentials)} disabled={!user?.isPremium} />
+                  <span className="slider round"></span>
+                </label>
+              </div>
 
+              <div className={`exam-mode-box ${!user?.isPremium ? "disabled-section" : ""}`}>
+                <div className="exam-mode-box-two">
+                <label className="create-flashcard-content-notes-label-header">Case Study Mode</label>
+                <label className="create-flashcard-content-notes-label-desc">Inserts short, hypothetical examples or scenarios that illustrate each key point in the notes.</label>
+                </div>
+                <label className="switch">
+                <input type="checkbox" checked={isCaseStudyMode} onChange={() => user?.isPremium && setIsCaseStudyMode(!isCaseStudyMode)} disabled={!user?.isPremium} />
                   <span className="slider round"></span>
                 </label>
               </div>
