@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import API from "../../utils/api.js";
 import loginImage from "../../assets/auth_image.png";
 import google from "../../assets/google.png";
 import apple from "../../assets/apple.png";
+import { AuthContext } from "../../utils/AuthContext";
 
 
 import logo from "../../assets/logo.png";
@@ -13,6 +14,7 @@ import logo from "../../assets/logo.png";
 import "./auth.css";
 
 const SignIn = () => {
+  const { updateUser } = useContext(AuthContext); // 🔄 Fix this
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,9 +36,11 @@ const SignIn = () => {
     setIsLoading(true); // Start loading
 
     try {
-      await API.post("/auth/signin", { email, password }); // Send login request
-      toast.success("Logged in successfully!");
-      navigate("/dashboard");
+      await API.post("/auth/signin", { email, password });
+    // After successful login, fetch user info
+    const meRes = await API.get("/auth/user");
+    updateUser(meRes.data);
+    navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {

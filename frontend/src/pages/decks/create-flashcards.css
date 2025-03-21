@@ -1,127 +1,14 @@
 @import '../../variables.css';
 
 .create-flashcard{
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    background-color: #f9fafb;
-}
-
-.create-flashcard-nav{
-    width: 100vw;
-    height: 5rem;
-    background-color:#ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.create-flashcard-nav-container{
-    height: 3rem;
-    margin-left: 4rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.create-flashcard-nav-container2{
-    height: 3rem;
-    margin-right: 4rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100%;
+  background-color: #f9fafb;
 }
 
 
-
-
-.create-flashcard-nav-container-text{
-    font-family: var(--font-family);
-    font-size: 1.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 24px;
-    margin: 0;
-    color: var(--text);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .3s ease-in-out;
-    
-}
-
-.create-flashcard-nav-container-logo{
-    width: 1.68rem;
-    height: 1.68rem;
-    margin-right: 8px;
-}
-
-.create-flashcard-nav-container-logo-prem{
-    width: 1.75rem;
-    height: 1.75rem;
-    margin-right: 1rem;
-}
-
-.create-flashcard-nav-container-profile {
-    width: 2.5rem; 
-    height: 2.5rem;
-    border-radius: 50%;  /* Creates the circle shape */
-    background-color: #e5e7eb;  /* Circle background color */
-    display: flex;
-    align-items: center;  /* Center content vertically */
-    justify-content: center;  /* Center content horizontally */
-    cursor: pointer;
-}
-
-.create-flashcard-nav-container-profile:hover{
-    background-color: var(--hover-color);
-}
-
-.create-flashcard-nav-container-profile-text {
-    color: var(--text); 
-    font-family: var(--font-family);
-    font-size: 1rem;  
-    margin: 0;  
-}
-
-.create-flashcard-nav-container2-button {
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: .7rem;
-    margin-right: 1rem;
-    height: 2rem;
-    width: 6rem;
-    background: linear-gradient(90deg, #5246e6, #793bec);
-    color: white;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-.create-flashcard-nav-container2-button:hover {
-    box-shadow: 0 0 2.5px var(--text), 0 0 5px var(--text);
-    border: 1px solid transparent;
-}
-
-
-
-.create-flashcard-nav-container3-button{
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: .7rem;
-    margin-right: 2rem;
-    height: 2rem;
-    width: 6rem;
-    background-color: var(--accent-color);
-    color: var(--text);
-    border: 1px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all .25s ease-in-out;
-}
 
 .create-flashcard-content{
     width: 100%;
@@ -130,6 +17,10 @@
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
 }
 
 .create-flashcard-content-container{

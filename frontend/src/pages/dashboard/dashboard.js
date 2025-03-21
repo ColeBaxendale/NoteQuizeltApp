@@ -3,42 +3,24 @@ import logo from "../../assets/logo.png";
 import card from "../../assets/flash-card.png";
 import ai from "../../assets/ai.png";
 import crown from "../../assets/crown.png";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import API from "../../utils/api.js";
-
+import { AuthContext } from "../../utils/AuthContext.js";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../../components/navbar/navbar.js";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [decks, setDecks] = useState([]);
+  const { user } = useContext(AuthContext); 
 
+  // Only fetch decks if user is present
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await API.get("/auth/user");
-        setUser(response.data);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-        navigate("/signin");
-      } finally {
-      }
-    };
-
-    fetchUser();
-  }, [navigate]);
-
-
-  useEffect(() => {
-    // Fetch the user's decks only if the user is logged in
     if (user) {
       const fetchDecks = async () => {
         try {
           const response = await API.get("/deck/user-decks");
-          // Sort decks by updatedAt descending (most recent first)
-          const sortedDecks = response.data.decks.sort(
-            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-          );
+          const sortedDecks = response.data.decks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
           setDecks(sortedDecks);
         } catch (err) {
           console.error("Failed to fetch decks:", err);
@@ -51,7 +33,7 @@ const Dashboard = () => {
   const handleUpgrade = () => {
     console.log("stripe");
   };
-  
+
   const createFlashCardSet = () => {
     navigate("/create-flashcards");
   };
@@ -60,25 +42,13 @@ const Dashboard = () => {
     navigate("/create-summary");
   };
 
+  const viewDeck = (deck) => {
+    navigate("/view-deck", { state: { deck, user } });
+  };
+
   return (
     <div className="dashboard">
-      <div className="dashboard-nav">
-        <div className="dashboard-nav-container">
-          <img src={logo} alt="" className="dashboard-nav-container-logo" />
-          <h1 className="dashboard-nav-container-text">NoteGenius</h1>
-        </div>
-        <div className="dashboard-nav-container2">
-          {user && !user.isPremium && (
-            <button className="dashboard-nav-container2-button" onClick={handleUpgrade}>
-              Get Premium
-            </button>
-          )}
-          {user && user.isPremium && <img src={crown} alt="" className="dashboard-nav-container-logo-prem" />}
-          <div className="dashboard-nav-container-profile">
-            <p className="dashboard-nav-container-profile-text">{user ? user.email.slice(0, 2).toUpperCase() : ""}</p>
-          </div>
-        </div>
-      </div>
+      <Navbar/>
       <div className="dashboard-content">
         <h2 className="dashboard-content-welcome">Welcome back!</h2>
         <p className="dashboard-content-text">Convert your notes into interactive learning material!</p>
@@ -106,21 +76,17 @@ const Dashboard = () => {
         <div className="dashboard-content-sets-sets">
           {decks.length > 0 ? (
             decks.map((deck) => (
-              <div className="tempset" key={deck._id}>
+              <div className="tempset" key={deck._id} onClick={() => viewDeck(deck)}>
                 <div className="tempset-left">
                   <h2 className="tempset-left-title">{deck.title}</h2>
                   <h2 className="tempset-left-text">{deck.description}</h2>
                 </div>
-                <p className="tempset-time">
-                  {new Date(deck.updatedAt).toLocaleDateString()}
-                </p>
+                <p className="tempset-time">{new Date(deck.updatedAt).toLocaleDateString()}</p>
               </div>
             ))
           ) : (
             <div className="no-sets">
-              <p>
-                You haven't created any study sets yet. Click an option above to get started!
-              </p>
+              <p>You haven't created any study sets yet. Click an option above to get started!</p>
             </div>
           )}
         </div>

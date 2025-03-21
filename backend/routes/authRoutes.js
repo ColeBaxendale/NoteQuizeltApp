@@ -21,7 +21,8 @@ router.get('/google/callback', passport.authenticate('google', { session: false 
         maxAge: 24 * 60 * 60 * 1000
     });
 
-    res.redirect('http://localhost:3000/dashboard'); 
+    res.redirect('http://localhost:3000/oauth-success'); 
+
 });
 
 

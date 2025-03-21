@@ -108,6 +108,7 @@ const CreateSummary = () => {
         content: notes,
         settings: {
           examEssentials: isExamEssentials,
+          caseStudy: isCaseStudyMode,
           summaryTone: selectedTone,
         },
       };

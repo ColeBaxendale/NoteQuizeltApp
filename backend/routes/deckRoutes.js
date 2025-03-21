@@ -8,7 +8,7 @@ require('dotenv').config();
 // Create a new deck (existing route)
 router.post('/create-deck-flashcards', authMiddleware, deckController.createDeckWithFlashcards);
 
-router.post('/create-deck-summary', authMiddleware, deckController.createDeckWithFlashcards);
+router.post('/create-deck-summary', authMiddleware, deckController.createDeckWithSummary);
 
 
 // Get all decks for the logged-in user
