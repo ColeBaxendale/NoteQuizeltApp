@@ -305,12 +305,13 @@
     width: 100%;
     max-width: 900px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     margin-bottom: 1rem;
 
 }
 
 .question{
+    width: 100%;
     resize: none;
     min-height: 6rem;
     outline: none;
@@ -325,13 +326,18 @@
 }
 
 .answer{
+    width: 100%;
+
     resize: none;
-    height: auto;
-    min-height: 4rem;
+    min-height: 6rem;
     outline: none;
+    text-align: left;
+    font-size: 1rem;
+    font-family: var(--font-family);
     background-color: #3A3A62; 
     border: none;
     color: var(--text);
+    margin: 0;
 
 }
 
