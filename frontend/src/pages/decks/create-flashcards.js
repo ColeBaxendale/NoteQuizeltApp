@@ -9,6 +9,7 @@ import API from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import Navbar from "../../components/navbar/navbar.js";
 
 const CreateFlashCards = () => {
   const [user, setUser] = useState(null);
@@ -131,23 +132,7 @@ const CreateFlashCards = () => {
           </div>
         </div>
       )}
-      <div className="create-flashcard-nav">
-        <div className="create-flashcard-nav-container">
-          <img src={logo} alt="Logo" className="create-flashcard-nav-container-logo" />
-          <h1 className="create-flashcard-nav-container-text">NoteGenius</h1>
-        </div>
-        <div className="create-flashcard-nav-container2">
-          {user && !user.isPremium && (
-            <button className="create-flashcard-nav-container2-button" onClick={handleUpgrade}>
-              Get Premium
-            </button>
-          )}
-          {user && user.isPremium && <img src={crown} alt="Premium" className="create-flashcard-nav-container-logo-prem" />}
-          <div className="create-flashcard-nav-container-profile">
-            <p className="create-flashcard-nav-container-profile-text">{user ? user.email.slice(0, 2).toUpperCase() : ""}</p>
-          </div>
-        </div>
-      </div>
+      <Navbar/>
       <div className="create-flashcard-content">
         <div className="create-flashcard-content-container">
           <div className="create-flashcard-content-container-left">

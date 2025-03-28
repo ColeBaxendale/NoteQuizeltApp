@@ -44,14 +44,11 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/view-deck"
-          element={
+          <Route path="/view-deck/:deckId" element={
             <ProtectedRoute>
               <ViewDeck />
             </ProtectedRoute>
-          }
-        />
+          } />
       </Routes>
     </AuthProvider>
   </Router>

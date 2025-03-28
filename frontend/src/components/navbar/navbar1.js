@@ -1,13 +1,16 @@
 import "./navbar.css";
-import logo from "../../assets/logo2.png";
+import logo from "../../assets/logo.png";
 import crown from "../../assets/crown.png";
 import React, { useContext } from "react";
 // import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../utils/AuthContext.js";
+import { FaArrowLeft } from "react-icons/fa";
 
 
-const Navbar = () => {
+
+const Navbar1 = () => {
   const { user } = useContext(AuthContext); 
+//   const navigate = useNavigate();
 
 
 
@@ -15,12 +18,21 @@ const Navbar = () => {
     console.log("stripe");
   };
 
+  const handleBack = () => {
+    console.log("stripe");
+  };
+
+
 
   return (
       <div className="create-flashcard-nav">
         <div className="create-flashcard-nav-container">
           <img src={logo} alt="Logo" className="create-flashcard-nav-container-logo" />
           <h1 className="create-flashcard-nav-container-text">NoteGenius</h1>
+              <div className="back-to-dashboard" onClick={handleBack}>
+                <FaArrowLeft className="back-icon" />
+                <span>Dashboard</span>
+              </div>
         </div>
         <div className="create-flashcard-nav-container2">
           {user && !user.isPremium && (
@@ -37,4 +49,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar1;

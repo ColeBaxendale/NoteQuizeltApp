@@ -4,6 +4,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Deck = require("../models/DeckSchema");
 const Flashcard = require("../models/FlashCardSchema");
 const Summarization = require("../models/SummarizationSchema");
+const Quiz = require("../models/QuizSchema");
 
 require("dotenv").config();
 
@@ -361,3 +362,27 @@ exports.createDeckWithSummary = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+exports.getDeckById = async (req, res) => {
+  try {
+    const deck = await Deck.findById(req.params.id)
+      .populate("flashcards")
+      .populate("summarizations")
+      .populate("quizzes"); 
+
+    if (!deck) {
+      return res.status(404).json({ message: "Deck not found" });
+    }
+
+    if (deck.user.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    res.status(200).json(deck);
+  } catch (error) {
+    console.error("Error fetching deck:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+

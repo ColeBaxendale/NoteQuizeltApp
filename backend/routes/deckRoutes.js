@@ -14,4 +14,7 @@ router.post('/create-deck-summary', authMiddleware, deckController.createDeckWit
 // Get all decks for the logged-in user
 router.get('/user-decks', authMiddleware, deckController.getUserDecks);
 
+router.get('/:id', authMiddleware, deckController.getDeckById);
+
+
 module.exports = router;

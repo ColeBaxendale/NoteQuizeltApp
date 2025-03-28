@@ -1,10 +1,10 @@
 .create-flashcard-nav{
     width: 100vw;
     height: 4rem;
-    background-color:#ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background-color: var(--secondary-background);
 }
 
 .create-flashcard-nav-container{
@@ -42,6 +42,10 @@
     
 }
 
+.create-flashcard-nav-container-text:hover{
+    color: var(--text-hover);
+}
+
 .create-flashcard-nav-container-logo{
     width: 1.68rem;
     height: 1.68rem;
@@ -58,7 +62,7 @@
     width: 2.5rem; 
     height: 2.5rem;
     border-radius: 50%;  /* Creates the circle shape */
-    background-color: #e5e7eb;  /* Circle background color */
+    background-color: var(--primary-color);
     display: flex;
     align-items: center;  /* Center content vertically */
     justify-content: center;  /* Center content horizontally */
@@ -66,7 +70,8 @@
 }
 
 .create-flashcard-nav-container-profile:hover{
-    background-color: var(--hover-color);
+    background-color: var(--primary-hover);
+
 }
 
 .create-flashcard-nav-container-profile-text {
@@ -83,7 +88,9 @@
     margin-right: 1rem;
     height: 2rem;
     width: 6rem;
-    background: linear-gradient(90deg, #5246e6, #793bec);
+    background: var(--gradient-button);    
+    background-size: 110% 110%;
+    background-position: center;
     color: white;
     border: 1px solid transparent;
     border-radius: 8px;
@@ -98,17 +105,4 @@
 
 
 
-.create-flashcard-nav-container3-button{
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: .7rem;
-    margin-right: 2rem;
-    height: 2rem;
-    width: 6rem;
-    background-color: var(--accent-color);
-    color: var(--text);
-    border: 1px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all .25s ease-in-out;
-}
+

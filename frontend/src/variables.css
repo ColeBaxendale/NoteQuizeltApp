@@ -4,17 +4,13 @@
     /* Font */
     --font-family: 'Inter', sans-serif;
 
-    /* Font */
-
-    /* Primary Colors */
-    --background-color: #efefef;
-    --secondary-background: #a0a9fb;
-    --primary-color: #4F46E5;
-    --hover-color: #6b63ff;
-    --text: #1F2937;
-    --text-hover: #465b78;
-    --accent-color: #FFC107;
-
+    --background-color: #21213b;
+    --primary-color: #6a5acd;
+    --primary-hover: #453b85;
+    --gradient-button: linear-gradient(90deg, #5246e6 0%, #793bec 100%);
+    --text: #ffffff;
+    --text-hover: #c8c8c8;
+    --secondary-background: #1a1a2e; 
 
 
 

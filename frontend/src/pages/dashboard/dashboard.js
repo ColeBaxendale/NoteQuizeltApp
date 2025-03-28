@@ -22,6 +22,8 @@ const Dashboard = () => {
           const response = await API.get("/deck/user-decks");
           const sortedDecks = response.data.decks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
           setDecks(sortedDecks);
+          console.log(sortedDecks);
+          
         } catch (err) {
           console.error("Failed to fetch decks:", err);
         }
@@ -42,8 +44,8 @@ const Dashboard = () => {
     navigate("/create-summary");
   };
 
-  const viewDeck = (deck) => {
-    navigate("/view-deck", { state: { deck, user } });
+  const viewDeck = (deckId) => {
+    navigate(`/view-deck/${deckId}`);
   };
 
   return (
@@ -76,7 +78,7 @@ const Dashboard = () => {
         <div className="dashboard-content-sets-sets">
           {decks.length > 0 ? (
             decks.map((deck) => (
-              <div className="tempset" key={deck._id} onClick={() => viewDeck(deck)}>
+              <div className="tempset" key={deck._id} onClick={() => viewDeck(deck._id)}>
                 <div className="tempset-left">
                   <h2 className="tempset-left-title">{deck.title}</h2>
                   <h2 className="tempset-left-text">{deck.description}</h2>

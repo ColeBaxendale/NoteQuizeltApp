@@ -1,51 +1,44 @@
 @import '../../variables.css';
 
 .create-flashcard{
-  display: flex;
-  flex-direction: column;
-  width: 100vw;
-  height: 100%;
-  background-color: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    min-height: 100vh;
+    background-color: #f9fafb;
 }
 
 
 
 .create-flashcard-content{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    padding-left: 4rem;
-    padding-right: 4rem;
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 4rem;
 }
 
 .create-flashcard-content-container{
-    background-color: white;
-    width: 90%;
-    height: 90%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); /* deeper shadow */
-    backdrop-filter: blur(2px); /* subtle blur effect */
-    border-radius: 10px;
+  background-color: white;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(2px);
+  border-radius: 10px;
 
 }
 
-.create-flashcard-content-container-left{
-    height: 100%;
-    width: 100%;
-    flex: 1 1 55%;
-    background-color: white;
-    border-right: 1px solid #c2c2c2;
-    display: flex;
-    flex-direction: column;
+.create-flashcard-content-container-left {
+  width: 100%;
+  flex: 1 1 55%;
+  background-color: white;
+  border-right: 1px solid #c2c2c2;
+  display: flex;
+  flex-direction: column;
 }
 
 .create-flashcard-content-container-left-title{
