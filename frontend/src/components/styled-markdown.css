@@ -1,0 +1,26 @@
+/* styled-markdown.css */
+.prose li::marker {
+    color: #a78bfa; /* violet marker bullets */
+  }
+  
+  .prose blockquote {
+    border-left: 4px solid #7dd3fc; /* sky blue */
+    padding-left: 1rem;
+    color: #93c5fd;
+  }
+  
+  .prose strong {
+    font-weight: 700;
+    color: #facc15; /* yellow */
+  }
+  
+  .prose em {
+    color: #d8b4fe;
+  }
+  
+  .prose h1, .prose h2, .prose h3 {
+    border-bottom: 1px solid #33333333;
+    padding-bottom: 0.2rem;
+    margin-bottom: 1rem;
+  }
+  

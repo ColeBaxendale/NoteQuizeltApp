@@ -10,15 +10,18 @@ import CreateFlashCards from "./pages/decks/create-flashcards";
 import CreateSummary from "./pages/decks/create-summary";
 import ViewDeck from "./pages/decks/view-deck";
 import LoadingScreen from "./pages/auths/loading";
+import Account from "./pages/auths/account";
 
 const App = () => {
   return (
     <Router>
     <AuthProvider>
-      <ToastContainer position="top-right" theme="light" transition={Slide} autoClose={3000} />
+      <ToastContainer position="top-right" theme="dark" transition={Slide} autoClose={3000} />
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/account" element={<Account />} />
+
         <Route path="/oauth-success" element={<LoadingScreen />} />
         <Route
           path="/dashboard"

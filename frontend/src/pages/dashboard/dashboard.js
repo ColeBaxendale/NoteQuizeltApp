@@ -98,6 +98,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-{
-  /* {user ? <h1>Welcome, {user.email}</h1> : <p>No user data available.</p>} */
-}

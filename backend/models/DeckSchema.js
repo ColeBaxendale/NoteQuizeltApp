@@ -30,10 +30,10 @@ const deckSchema = new Schema({
     ref: 'Quiz'
   }],
   // References to generated summarizations
-  summarizations: [{
+  summarization: {
     type: Schema.Types.ObjectId,
     ref: 'Summarization'
-  }],
+  },
   updatedAt: { 
     type: Date, 
     default: Date.now 

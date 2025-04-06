@@ -53,6 +53,7 @@ async function generateFlashcardsFromNotes(notes, isPremium, isExamEssentials, f
 You are a flashcard generator. Your ONLY task is to create flashcards in the requested format.
 NEVER introduce yourself or reply conversationally.
 NEVER include extra text or explanations.
+NEVER INCLUDE MARKDOWN.
 ONLY return a valid JSON array following this EXACT structure: [{"question": "string", "answer": "string"}].
       `.trim(),
       },
@@ -82,19 +83,19 @@ ONLY return a valid JSON array following this EXACT structure: [{"question": "st
 
         switch (flashcardStyle) {
           case "simple":
-            taskDescription += "Create simple Q&A flashcards. Make sure you cover all topics in the notes";
+            taskDescription += "Create simple Q&A flashcards. Clean up both questions and answers, use your knowledge to make them better too. Make sure you cover all topics in the notes";
             break;
           case "detailed":
-            taskDescription += "Create flashcards with detailed explanations in the answers.";
+            taskDescription += "Create flashcards with detailed explanations in the answers. Clean up both questions and answers, use your knowledge to make them better too. ";
             break;
           case "fill":
-            taskDescription += "Convert factual statements into fill-in-the-blank flashcards. For each card, remove one key term and replace it with '_____'. Provide the removed term as the answer.";
+            taskDescription += "Convert factual statements into fill-in-the-blank flashcards. For each card, remove one key term and replace it with '_____'. Provide the removed term as the answer. Clean up both questions and answers, use your knowledge to make them better too.";
             break;
           case "mnemonics":
-            taskDescription += "Create flashcards and include helpful mnemonics in the answers and ways to easily remember the content.";
+            taskDescription += "Create flashcards and include helpful mnemonics in the answers and ways to easily remember the content. Clean up both questions and answers, use your knowledge to make them better too. ";
             break;
           default:
-            taskDescription += "Create simple Q&A flashcards.";
+            taskDescription += "Create simple Q&A flashcards. Clean up both questions and answers, use your knowledge to make them better too. ";
             break;
         }
       }
@@ -180,7 +181,6 @@ exports.createDeckWithFlashcards = async (req, res) => {
     const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
 
     newDeck.flashcards = insertedFlashcards.map((fc) => fc._id);
-    newDeck.description = `Flashcards - ${insertedFlashcards.length} cards`;
     await newDeck.save();
 
     return res.status(201).json({
@@ -216,50 +216,48 @@ async function generateSummaryFromNotes(notes, isPremium, isExamEssentials, isCa
   const chunks = chunkNotes(notes, isPremium);
 
   const generationConfig = {
-    temperature: 0,
+    temperature: 0.4,
     stopSequences: [],
   };
 
   const systemInstruction = {
-    parts: [
-      {
-        text: `
-You are a summary generator. Your ONLY task is to create a markdown summary from the provided notes.
-NEVER include any extra text, introductions, or conclusions.
-ONLY output a valid markdown file using headings, bullet points, paragraphs, and any other markdown formatting as needed.
-      `.trim(),
-      },
-    ],
+    parts: [{
+      text: `
+  You are a markdown note generator.
+  ONLY output clean, valid Markdown (no extra symbols or spacing errors).
+  
+  Rules:
+  - Use proper headers with a space (e.g., '# Title')
+  - Avoid broken bullets (no '*' alone on a line)
+  - Use '-' or '*' for bullets with actual content after them
+  - Use emojis, bold, italics, and callouts sparingly but consistently
+  - Separate sections clearly
+  - Use spacing to keep things readable (double newlines between groups)
+  
+  DO NOT add code blocks or markdown fences (no backticks or triple quotes).
+  `.trim()
+    }]
   };
-
+  
+  
   for (const chunk of chunks) {
-    if (!chunk.trim()) {
-      console.warn("⚠️ Skipping empty chunk");
-      continue;
-    }
+    if (!chunk.trim()) continue;
 
     try {
       let taskDescription = "";
+
       if (!isPremium) {
-        // For free users: force examEssentials off, caseStudy off, and tone "simple"
-        taskDescription = `Create a markdown summary of the notes. Use bullet points, headings, and paragraphs to organize the content clearly. Limit the output to a maximum of 20,000 characters overall. Use a simplified tone.`;
-        console.log(taskDescription);
-
+        taskDescription = `
+Create well-structured, markdown-formatted study notes with a max length of 20,000 characters.
+Use simplified, easy-to-read language and follow the formatting rules above.
+`.trim();
       } else {
-        // Premium users: use provided settings
-        if (isExamEssentials) {
-          taskDescription += "Focus on key facts and core concepts for exam preparation. ";
-        console.log(taskDescription);
-
-        }
-        if (isCaseStudyMode) {
-          taskDescription += "Include hypothetical examples where relevant. ";
-        console.log(taskDescription);
-
-        }
-        taskDescription += `Use a ${selectedTone} tone. Generate a well-organized markdown summary using headings, bullet points, and paragraphs.`;
-        console.log(taskDescription);
-
+        taskDescription = `
+Create premium-style markdown study notes.
+${isExamEssentials ? "Focus on core concepts and test-critical info." : ""}
+${isCaseStudyMode ? "Include brief hypothetical examples for context." : ""}
+Use a ${selectedTone} tone and follow the formatting rules above.
+`.trim();
       }
 
       const prompt = `
@@ -272,7 +270,6 @@ ${chunk}
 """
 `.trim();
 
-
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig,
@@ -281,18 +278,15 @@ ${chunk}
 
       let generatedText = result.response.text().trim();
 
+      // Strip surrounding code blocks if present
       if (generatedText.startsWith("```")) {
         const firstNewlineIndex = generatedText.indexOf("\n");
-        generatedText = generatedText.substring(firstNewlineIndex + 1);
-        generatedText = generatedText.replace(/```$/, "").trim();
+        generatedText = generatedText.substring(firstNewlineIndex + 1).replace(/```$/, "").trim();
       }
 
       generatedText = generatedText.replace(/[\x00-\x1F\x7F]/g, "");
+      finalSummary += generatedText + "\n\n";
 
-      console.log("\n=== RAW RESPONSE FROM GEMINI ===\n");
-      console.log(generatedText);
-
-      finalSummary += generatedText + "\n\n"; // Separate chunks with newlines
     } catch (error) {
       console.error("Gemini chunk error:", error);
     }
@@ -301,8 +295,10 @@ ${chunk}
   if (!isPremium && finalSummary.length > 20000) {
     finalSummary = finalSummary.substring(0, 20000);
   }
+
   return finalSummary;
 }
+
 
 exports.createDeckWithSummary = async (req, res) => {
   try {
@@ -328,11 +324,12 @@ exports.createDeckWithSummary = async (req, res) => {
       user: userId,
       description: "Summary",
       flashcards: [],
-      summarizations: [],
+      summarization: null, // single summarization object now
       updatedAt: Date.now(),
     });
     await newDeck.save();
 
+    // Generate the summary from notes
     const generatedSummary = await generateSummaryFromNotes(
       content,
       req.user.isPremium,
@@ -341,15 +338,15 @@ exports.createDeckWithSummary = async (req, res) => {
       summaryTone
     );
 
-    // Create a Summarization object and link it to the deck
+    // Create the summarization and attach it to the deck
     const newSummary = await Summarization.create({
       summary: generatedSummary,
       user: userId,
       deck: newDeck._id,
     });
 
-    newDeck.summarizations.push(newSummary._id);
-    newDeck.description = `Summary generated successfully (${generatedSummary.length} characters)`;
+    // Update deck with single summarization reference
+    newDeck.summarization = newSummary._id;
     await newDeck.save();
 
     return res.status(201).json({
@@ -368,7 +365,7 @@ exports.getDeckById = async (req, res) => {
   try {
     const deck = await Deck.findById(req.params.id)
       .populate("flashcards")
-      .populate("summarizations")
+      .populate("summarization")
       .populate("quizzes"); 
 
     if (!deck) {

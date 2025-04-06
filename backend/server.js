@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 require('./config/passport'); 
 const authRoutes = require('./routes/authRoutes');
 const deckRoutes = require('./routes/deckRoutes');
+const flashcardRoutes = require('./routes/flashcardRoutes');
+
 
 
 
@@ -27,6 +29,7 @@ app.use(passport.initialize());
 
 app.use('/auth', authRoutes);
 app.use('/deck', deckRoutes);
+app.use('/flashcard', flashcardRoutes)
 
 
 
