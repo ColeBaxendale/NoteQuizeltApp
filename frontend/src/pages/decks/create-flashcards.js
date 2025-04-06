@@ -32,7 +32,7 @@ const CreateFlashCards = () => {
         setUser(response.data);
       } catch (err) {
         console.error("Failed to fetch user:", err);
-        navigate("/signin");
+        navigate("/account");
       }
     };
 
