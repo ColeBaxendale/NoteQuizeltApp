@@ -383,3 +383,79 @@ exports.getDeckById = async (req, res) => {
   }
 };
 
+
+exports.renameDeck = async (req, res) => {
+  const deckId = req.params.id;
+  const newTitle = req.body.title?.trim();
+
+  if (!newTitle) {
+    return res.status(400).json({ message: "Title is required." });
+  }
+
+  try {
+    const deck = await Deck.findById(deckId);
+
+    if (!deck) {
+      return res.status(404).json({ message: "Deck not found" });
+    }
+
+    if (deck.user.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // If the title hasn’t changed, no need to continue
+    if (deck.title === newTitle) {
+      return res.status(200).json({ message: "No changes made.", deck });
+    }
+
+    // Check if another deck by the same user already has this title
+    const existingDeck = await Deck.findOne({
+      user: req.user.userId,
+      title: newTitle,
+    });
+
+    if (existingDeck) {
+      return res.status(409).json({ message: "You already have a deck with this title." });
+    }
+
+    // Update title and save
+    deck.title = newTitle;
+    await deck.save();
+
+    res.status(200).json({ message: "Deck renamed successfully", deck });
+  } catch (error) {
+    console.error("Error renaming deck:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+exports.deleteDeck = async (req, res) => {
+  try {
+    // Get deck id from the route params
+    const deckId = req.params.id;
+    // Get user id from the authenticated user object
+    const userId = req.user.userId;
+    
+    // Ensure the deck belongs to the authenticated user
+    const deletedDeck = await Deck.findOneAndDelete({ _id: deckId, user: userId });
+    
+    if (!deletedDeck) {
+      console.log("Deck not found or not owned by user.");
+      return res.status(404).json({ message: 'Deck not found' });
+    }
+    
+    // Cascade delete associated flashcards, quizzes, and summarization
+    await Flashcard.deleteMany({ deck: deckId });
+    await Quiz.deleteMany({ deck: deckId });
+    await Summarization.deleteOne({ deck: deckId });
+    
+    res.status(200).json({ message: 'Deck and all associated data deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting deck:", error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
