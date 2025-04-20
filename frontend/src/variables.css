@@ -23,3 +23,59 @@ body {
     background-color: var(--background-color);
   }
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+  .swal-custom-popup {
+    border-radius: 12px;
+    padding: 2rem;
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+  }
+
+  .swal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .swal-text {
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .swal-confirm-button {
+    background: var(--gradient-button);
+    color: white;
+    border: none;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-family);
+    font-weight: 500;
+    box-shadow: 0 0 12px rgba(121, 59, 236, 0.4);
+    transition: all 0.3s ease;
+  }
+  
+  .swal-confirm-button:hover {
+    background: var(--gradient-button)!important;
+    box-shadow: 0 0 20px rgba(121, 59, 236, 0.6);
+    transform: translateY(-1px);
+
+    
+  }
+  
+  .swal-cancel-button {
+    border: none !important;
+    background: var(--text);
+    color: #374151;
+    outline: none !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-family);
+    font-weight: 400;
+    transition: all 0.3s ease;
+  }
+  
+  .swal-cancel-button:hover {
+    background: var(--text-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+  }
+  

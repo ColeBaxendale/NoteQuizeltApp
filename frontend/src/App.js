@@ -9,6 +9,7 @@ import CreateSummary from "./pages/decks/create-summary";
 import ViewDeck from "./pages/decks/view-deck";
 import LoadingScreen from "./pages/auths/loading";
 import Account from "./pages/auths/account";
+import CreateDeck from "./pages/decks/create-deck";
 
 const App = () => {
   return (
@@ -32,6 +33,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <CreateFlashCards />
+            </ProtectedRoute>
+          }
+        />
+
+<Route
+          path="/create-set"
+          element={
+            <ProtectedRoute>
+              <CreateDeck />
             </ProtectedRoute>
           }
         />

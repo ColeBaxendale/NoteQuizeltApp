@@ -1,351 +1,416 @@
-@import '../../variables.css';
+@import "../../variables.css";
 
-.dashboard{
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100%;
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100%;
 }
 
-.dashboard-content{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-left: 4rem;
-    padding-right: 4rem;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
-    box-sizing: border-box;
-    z-index: 1;
-    position: relative;
+.dashboard-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  box-sizing: border-box;
+  z-index: 1;
+  position: relative;
 }
 
-.dashboard-content-welcome{
-    font-family: var(--font-family);
-    color: var(--text);
-    font-size: 2rem;
-    text-align: left;
-    margin: 0;
-    margin-bottom: 1rem;
-    font-weight: 600;
+.dashboard-content-welcome {
+  font-family: var(--font-family);
+  color: var(--text);
+  font-size: 2rem;
+  text-align: left;
+  margin: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
-.dashboard-content-text{
-    font-family: var(--font-family);
-    color: var(--text-hover);
-    font-size: 1rem;
-    text-align: left;
-    margin: 0;
-    margin-bottom: 2.5rem;
-    font-weight: 200;
+.dashboard-content-text {
+  font-family: var(--font-family);
+  color: var(--text-hover);
+  font-size: 1rem;
+  text-align: left;
+  margin: 0;
+  margin-bottom: 2.5rem;
+  font-weight: 200;
 }
 
-.dashboard-content-first-container{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    gap: 4rem;
-    justify-content: space-around;
-    margin-bottom: 2.5rem;
+.dashboard-content-first-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 4rem;
+  justify-content: space-around;
+  margin-bottom: 2.5rem;
 }
 
 .dashboard-content-first-container-box {
-    width: 100%;
-    height: 12rem;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  
-    border: 1px solid transparent;
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(6px);
-    color: var(--text-hover);
-  
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
-    box-shadow: 0 0 10px rgba(121, 59, 236, 0.15);
-    will-change: transform;
-  }
-  
-  .dashboard-content-first-container-box:hover {
-    border-color: var(--primary-hover);
-    background-color: rgba(255, 255, 255, 0.05);
-    transform: scale(1.01);
-    box-shadow: 0 0 14px rgba(153, 102, 255, 0.3);
-  }
-  
+  width: 100%;
+  height: 12rem;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(6px);
+  color: var(--text-hover);
 
-.dashboard-content-first-container-box-icons{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 0 10px rgba(121, 59, 236, 0.15);
+  will-change: transform;
 }
 
-.dashboard-content-first-container-box-icons-box{
-    width: 3rem;
-    height: 3rem;
-    background-color:transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
+.dashboard-content-first-container-box:hover {
+  border-color: var(--primary-hover);
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+  box-shadow: 0 0 14px rgba(153, 102, 255, 0.3);
 }
 
-.dashboard-content-first-container-box-icons-box2{
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.dashboard-content-first-container-box-icons-box-icon{
-    height: 2rem;
-    width: 2rem;
-}
-.dashboard-content-first-container-box-icons-box-icon2{
-    height: 1.5rem;
-    width: 1.5rem;
-}
-
-.dashboard-content-first-container-box-icons-box-header{
-    font-family: var(--font-family);
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin: 0;
-    margin-bottom: .25rem;
-}
-
-.dashboard-content-first-container-box-icons-box-content{
-    font-family: var(--font-family);
-    font-size: .8rem;
-    font-weight: 200;
-}
-
-.dashboard-content-sets-header{
-    width: 100%;
-    height: 3rem;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-    padding: 1.5rem;
-}
-
-.dashboard-content-sets-text{
-    font-family: var(--font-family);
-    color: var(--text);
-    font-size: 1.5rem;
-    text-align: left;
-    margin: 0;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.dashboard-content-sets-sets{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding-bottom: 4rem;
-}
-.tempset {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    position: relative;
+.dashboard-content-first-container-box-icons {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    
-    background-color: rgba(255, 255, 255, 0.02); /* subtle glassy bg */
-    backdrop-filter: blur(4px);
-  
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  
-    cursor: pointer;
-    color: var(--text);
-  
-    transition: all 0.2s ease-in-out;
-  }
+  align-items: center;
+  margin-bottom: 1rem;
+}
 
-  .tempset-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    position: relative;
-  }
+.dashboard-content-first-container-box-icons-box {
+  width: 3rem;
+  height: 3rem;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+}
 
-  .tempset-buttons-width {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+.dashboard-content-first-container-box-icons-box2 {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dashboard-content-first-container-box-icons-box-icon {
+  height: 2rem;
+  width: 2rem;
+}
+.dashboard-content-first-container-box-icons-box-icon2 {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.dashboard-content-first-container-box-icons-box-header {
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-content-first-container-box-icons-box-content {
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  font-weight: 200;
+  
+}
+
+.lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Darken the box */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  transition: opacity 0.3s ease, background 0.3s ease;
+  
   }
-  .tempset-title-input {
+  
+  .dashboard-content-first-container-box:hover .lock-overlay {
+    opacity: 1; /* Show on hover */
+    background: linear-gradient(90deg, #5246e6 0%, #793bec 110%, 0.5);
+    backdrop-filter: blur(8px); /* Frosted glass effect */
+
+
+  }
+  
+  .lock-overlay-hover {
+    display: none; /* Hidden by default */
     font-family: var(--font-family);
-    font-size: 1rem;
-    font-weight: 600;
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--primary-color);
-    border-radius: 6px;
-    padding: 0.25rem 0.5rem;
-    width: 100%;
-    height: 2rem;
-    outline: none;
-    box-sizing: border-box;
+    font-weight: 400;
+    font-size: 1.25rem;
+    text-align: center;
+    background: var(--gradient-button);
+    -webkit-background-clip: text; /* Clip the background to the text */
+    color: transparent; /* Make the text itself transparent so the background shows through */
+    background-size: 110% 110%;
+    background-position: center;
+    transition: transform 0.2s ease;
   }
-
-  .tempset-dropdown-confirm > div {
-    padding: 0.5rem 1rem;
+  
+  .dashboard-content-first-container-box:hover .lock-overlay-hover {
+    display: block; /* Show the "Get Premium" text on hover */
     cursor: pointer;
-    color: var(--text);
+    transition: transform 0.2s ease;
   }
-  
-  .tempset-dropdown-confirm > div:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
   
 
-  .tempset-buttons-width-inner {
-    width: auto;
-  }
 
-  .tempset-menu-button {
-    background: none;
-    border: none;
-    color: var(--text);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.2s ease;
+.dashboard-content-sets-header {
+  width: 100%;
+  height: 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1.5rem;
+}
+
+.dashboard-content-sets-text {
+  font-family: var(--font-family);
+  color: var(--text);
+  font-size: 1.5rem;
+  text-align: left;
+  margin: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-content-sets-sets {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 4rem;
+}
+
+.tempset {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+  justify-content: space-between;
+  border-radius: 12px;
+  border: 1px solid transparent;
+
+  background-color: rgba(255, 255, 255, 0.02); /* subtle glassy bg */
+  backdrop-filter: blur(4px);
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  cursor: pointer;
+  color: var(--text);
+
+  transition: all 0.2s ease, transform 0.15s ease;
+}
+
+.tempset-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+}
+
+.tempset-buttons-width {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.tempset-title-input {
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  width: 100%;
+  height: 2rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.tempset-dropdown-confirm > div {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.tempset-dropdown-confirm > div:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tempset-buttons-width-inner {
+  width: auto;
+}
+
+.tempset-menu-button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tempset-menu-button:hover {
+  background: rgba(255, 255, 255, 0.05); /* frosted hover */
+  color: var(--primary-color);
+}
+.tempset-dropdown {
+  position: absolute;
+  top: 2.2rem;
+  right: 0;
+  background: rgba(35, 35, 45, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(121, 59, 236, 0.2);
+  border-radius: 14px;
+  padding: 0.3rem 0;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  animation: fadeInDropdown 0.2s ease;
+  width: max-content; /* 🔥 auto-width based on content */
+  min-width: 130px; /* just in case there's a single short word */
+}
+
+.tempset-dropdown > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 8px;
+  padding: 0.6rem 1rem; /* 👈 equal left and right margin */
+  white-space: nowrap; /* 🧼 keeps it inline */
+}
+
+.tempset-dropdown > div:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--primary-color);
+  box-shadow: inset 0 0 0 1px rgba(121, 59, 236, 0.25);
+}
+
+@keyframes fadeInDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
   }
-  
-  .tempset-menu-button:hover {
-    color: var(--primary-color);
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
-  
-  .tempset-dropdown {
-    position: absolute;
-    top: 1.5rem;
-    right: 0;
-    background-color: rgba(30, 30, 40, 0.95);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--primary-hover);
-    border-radius: 8px;
-    padding: 0.5rem 0;
-    z-index: 99999;
-    min-width: 120px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  }
-  
-  .tempset-dropdown > div {
-    padding: 0.5rem 1rem;
-    color: var(--text);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  
-  .tempset-dropdown > div:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .tempset:hover {
-    border: 1px solid var(--primary-hover);
-    background-color: rgba(255, 255, 255, 0.05);
-    transform: scale(1.01);
-    box-shadow: 0 0 10px rgba(153, 102, 255, 0.2);
-    z-index: 0;
-  }
+}
+
+.tempset:hover {
+  border: 1px solid var(--primary-hover);
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01) translateY(-1px);
+  box-shadow: 0 0 10px rgba(153, 102, 255, 0.2);
+  z-index: 0;
+}
 
 /* Disable hover styles for sets while a dropdown is open */
 .dashboard-content-sets-sets.dropdown-open .tempset:not(.tempset-open):hover {
-    pointer-events: none;
-    filter: brightness(1); /* prevents the visual "hover" */
-    transform: none;
-    box-shadow: none;
-    border-color: transparent;
-    background-color: rgba(255, 255, 255, 0.02); /* maintain default */
-  }
-  
-  /* Keep hover style for the open set */
-  .tempset.tempset-open {
-    border: 1px solid var(--primary-hover);
-    background-color: rgba(255, 255, 255, 0.05);
-    transform: scale(1.01);
-    box-shadow: 0 0 10px rgba(153, 102, 255, 0.2);
-    z-index: 10;
-  }
-  
-  
-
-  .tempset:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.025);
-  }
-  
-.tempset-left{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: .5rem;
-    width: 75%;
+  pointer-events: none;
+  filter: brightness(1); /* prevents the visual "hover" */
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+  background-color: rgba(255, 255, 255, 0.02); /* maintain default */
 }
 
-.tempset-left-title{
-    font-family: var(--font-family);
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-    margin-bottom: .25rem;
-    text-align: left;
-
-}
-.tempset-left-text{
-    font-family: var(--font-family);
-    font-size: .75rem;
-    font-weight: 300;
-    margin: 0;
-    text-align: left;
-    margin-bottom: .25rem;
-
+/* Keep hover style for the open set */
+.tempset.tempset-open {
+  border: 1px solid var(--primary-hover);
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+  box-shadow: 0 0 10px rgba(153, 102, 255, 0.2);
+  z-index: 10;
 }
 
-.tempset-time{
-    font-family: var(--font-family);
-    font-size: .75rem;
-    font-weight: 300;
-    margin: 0;
-    text-align: left;
-    color: var(--text-hover);
-
+.tempset:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.025);
 }
 
-.tempset-study{
-    background-color: var(--primary-color);
-    padding: .5rem;
-    border-radius: 8px;
+.tempset-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 75%;
 }
 
-.no-sets{
-    font-family: var(--font-family);
-    font-size: 1rem;
-    font-weight: 300;
-    margin: 0;
-    text-align: left;
-    color: var(--text-hover);
+.tempset-left-title {
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  margin-bottom: 0.25rem;
+  text-align: left;
+}
+.tempset-left-text {
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight: 300;
+  margin: 0;
+  text-align: left;
+  margin-bottom: 0.25rem;
+}
+
+.tempset-time {
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  font-weight: 300;
+  margin: 0;
+  text-align: left;
+  color: var(--text-hover);
+}
+
+.tempset-study {
+  background-color: var(--primary-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  color: white;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+.tempset-study:hover {
+  box-shadow: 0 0 8px rgba(121, 59, 236, 0.25); /* use your actual primary RGB if you have it as --primary-rgb */
+  transform: translateY(-1px);
+}
+
+.no-sets {
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 300;
+  margin: 0;
+  text-align: left;
+  color: var(--text-hover);
 }
