@@ -295,7 +295,7 @@ const ViewDeck = () => {
         </div>
 
         <div className="deck-tab-nav">
-          {["Summary", "Flashcards", "Tests"].map((tab) => (
+          {["Summary", "Flashcards", "Tests", "AI Tools"].map((tab) => (
             <button key={tab} className={`page-view ${activeView === tab ? "active" : ""}`} onClick={() => setActiveView(tab)}>
               {tab}
             </button>

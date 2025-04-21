@@ -1,9 +1,6 @@
 import "./dashboard.css";
-import logo from "../../assets/logo.png";
 import card from "../../assets/flash-card.png";
 import ai from "../../assets/ai.png";
-import crown from "../../assets/crown.png";
-
 import React, { useEffect, useState, useContext, useRef } from "react";
 import API from "../../utils/api.js";
 import { AuthContext } from "../../utils/AuthContext.js";
@@ -25,6 +22,8 @@ const Dashboard = () => {
   const dropdownRef = useRef(null);
   const renameInputRef = useRef(null);
   const menuClickedRef = useRef(false);
+  const canChat = user.isPremium === 2;
+  const overlayText = user.isPremium === 0 ? "Get Premium" : "Upgrade to Super Premium";
 
   const handleUpgrade = () => {
     console.log("stripe");
@@ -33,8 +32,7 @@ const Dashboard = () => {
   const navigateToChat = () => {
     console.log("to chat");
   };
-  
-  
+
   useEffect(() => {
     if (user) {
       const fetchDecks = async () => {
@@ -122,39 +120,43 @@ const Dashboard = () => {
         <h2 className="dashboard-content-welcome">Welcome back!</h2>
         <p className="dashboard-content-text">Let’s turn your notes into something powerful...</p>
 
+        <div className="dashboard-content-first-container">
+          {/* Create New Study Set */}
+          <div className="dashboard-content-first-container-box" onClick={createDeck}>
+            <div className="dashboard-content-first-container-box-icons">
+              <div className="dashboard-content-first-container-box-icons-box">
+                <img src={card} alt="" className="dashboard-content-first-container-box-icons-box-icon" />
+              </div>
+            </div>
+            <h2 className="dashboard-content-first-container-box-icons-box-header">Create New Study Set</h2>
+            <p className="dashboard-content-first-container-box-icons-box-content">Transform your notes into interactive learning tools for effective learning.</p>
+          </div>
 
-<div className="dashboard-content-first-container">
-  {/* Create New Study Set */}
-  <div className="dashboard-content-first-container-box" onClick={createDeck}>
-    <div className="dashboard-content-first-container-box-icons">
-      <div className="dashboard-content-first-container-box-icons-box">
-        <img src={card} alt="" className="dashboard-content-first-container-box-icons-box-icon" />
-      </div>
-    </div>
-    <h2 className="dashboard-content-first-container-box-icons-box-header">Create New Study Set</h2>
-    <p className="dashboard-content-first-container-box-icons-box-content">Transform your notes into interactive learning tools for effective learning.</p>
-  </div>
+          {/* Chat for Deeper Insights (with Lock for Non-Premium Users) */}
+          <div
+            className="dashboard-content-first-container-box"
+            onClick={() => {
+              if (canChat) {
+                navigateToChat(); // only for isPremium==="2"
+              }
+            }}
+          >
+            <div className="dashboard-content-first-container-box-icons">
+              <div className="dashboard-content-first-container-box-icons-box">
+                <img src={ai} alt="" className="dashboard-content-first-container-box-icons-box-icon" />
+              </div>
+            </div>
 
-  {/* Chat for Deeper Insights (with Lock for Non-Premium Users) */}
-  <div className="dashboard-content-first-container-box"onClick={user.isPremium ? navigateToChat : handleUpgrade}>
-    <div className="dashboard-content-first-container-box-icons">
-      <div className="dashboard-content-first-container-box-icons-box">
-        <img src={ai} alt="" className="dashboard-content-first-container-box-icons-box-icon" />
-      </div>
-    </div>
-    <h2 className="dashboard-content-first-container-box-icons-box-header">Chat for Deeper Insights</h2>
-    <p className="dashboard-content-first-container-box-icons-box-content">Get personalized explanations and dive deeper into your study material.</p>
+            <h2 className="dashboard-content-first-container-box-icons-box-header">Chat for Deeper Insights</h2>
+            <p className="dashboard-content-first-container-box-icons-box-content">Get personalized explanations and dive deeper into your study material.</p>
 
-    {/* Lock Overlay */}
-    {!user.isPremium && (
-      <div className="lock-overlay" onClick={handleUpgrade}>
-        <div className="lock-overlay-hover" >
-          Unlock Premium
+            {!canChat && (
+              <div className="lock-overlay" onClick={handleUpgrade}>
+                <div className="lock-overlay-hover">{overlayText}</div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    )}
-  </div>
-</div>
 
         <h2 className="dashboard-content-sets-text">My Study Sets</h2>
 

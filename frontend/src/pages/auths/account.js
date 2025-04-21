@@ -20,7 +20,6 @@ const Account = () => {
 
   const [emailSignup, setEmailSignup] = useState("");
   const [passwordSignup, setPasswordSignup] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,10 +38,6 @@ const Account = () => {
     }
     if (!password || password.length < 8) {
       toast.error("Password must be at least 8 characters long.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
       return;
     }
 

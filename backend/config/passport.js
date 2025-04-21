@@ -20,7 +20,7 @@ async function handleOAuthLogin(profile, provider) {
             email: profile.emails ? profile.emails[0].value : `${profile.id}@${provider}.com`,
             isOAuth: true,
             [`${provider}Id`]: profile.id,
-            isPremium: false,
+            isPremium: 0,
         });
         await user.save();
 

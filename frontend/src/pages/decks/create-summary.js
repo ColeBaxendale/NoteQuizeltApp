@@ -1,7 +1,5 @@
 /* eslint-disable no-lone-blocks */
 import "./create-flashcards.css";
-import logo from "../../assets/logo.png";
-import crown from "../../assets/crown.png";
 import Swal from "sweetalert2";
 import wand from "../../assets/wand.png";
 import React, { useEffect, useState } from "react";

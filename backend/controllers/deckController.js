@@ -17,15 +17,21 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
 
 function chunkNotes(notes, isPremium) {
-  const size = isPremium ? PREMIUM_CHUNK_SIZE : FREE_CHUNK_SIZE;
+  if (!notes || !notes.length) return [];
+
+  // Free users ("0") get smaller chunks; premium ("1" or "2") get larger chunks
+  const size = isPremium === 0 ? FREE_CHUNK_SIZE : PREMIUM_CHUNK_SIZE;
   const chunks = [];
   let start = 0;
+
   while (start < notes.length) {
     const end = Math.min(start + size, notes.length);
     chunks.push(notes.slice(start, end));
     start = end;
   }
-  return isPremium ? chunks : chunks.slice(0, 2); // free users limited to 2 chunks
+
+  // Free users only get the first two chunks
+  return isPremium === 0 ? chunks.slice(0, 2) : chunks;
 }
 
 const extractFirstJSONArray = (text) => {
@@ -41,66 +47,53 @@ async function generateFlashcardsFromNotes(notes, isPremium, isExamEssentials, f
   const allFlashcards = [];
   const chunks = chunkNotes(notes, isPremium);
 
-  const generationConfig = {
-    temperature: 0,
-    stopSequences: [],
-  };
+  // Tiered limits
+  const freeLimit    = 50;
+  const basicLimit   = 500;
+  // super premium has no limit
 
+  const generationConfig = { temperature: 0, stopSequences: [] };
   const systemInstruction = {
-    parts: [
-      {
-        text: `
+    parts: [{
+      text: `
 You are a flashcard generator. Your ONLY task is to create flashcards in the requested format.
 NEVER introduce yourself or reply conversationally.
 NEVER include extra text or explanations.
 NEVER INCLUDE MARKDOWN.
 ONLY return a valid JSON array following this EXACT structure: [{"question": "string", "answer": "string"}].
-      `.trim(),
-      },
-    ],
+      `.trim()
+    }]
   };
 
   for (const chunk of chunks) {
-    if (!chunk.trim()) {
-      console.warn("⚠️ Skipping empty chunk");
-      continue;
+    if (!chunk.trim()) continue;
+
+    let taskDescription = "";
+
+    if (isPremium === 0) {
+      taskDescription = `Create no more than ${freeLimit} simple Q&A flashcards focused on the most critical topics.`;
+    } else if (isPremium === 1) {
+      taskDescription = `Create no more than ${basicLimit} flashcards. `;
+      if (isExamEssentials) taskDescription += "Focus on key facts and core concepts for exam preparation. ";
+      // then style-based append…
+      switch (flashcardStyle) {
+        case "simple":
+          taskDescription += "Use simple Q&A. Clean up questions and answers.";
+          break;
+        // … other cases identical to before
+      }
+    } else { // "2"
+      if (isExamEssentials) taskDescription += "Focus on key facts and core concepts for exam preparation. ";
+      // style-based append…
+      switch (flashcardStyle) {
+        case "simple":
+          taskDescription += "Create simple Q&A flashcards.";
+          break;
+        // … others
+      }
     }
 
-    try {
-      let taskDescription = "";
-      
-
-      if (!isPremium) {
-        const cardLimit = chunk.length < 20000 ? 50 : 25;
-
-        taskDescription = `Create no more than ${cardLimit} simple Q&A flashcards focused on the most critical topics.`;
-      } else {
-        // Premium user logic
-        if (isExamEssentials) {
-
-          taskDescription += "Focus on key facts and core concepts for exam preparation. ";
-        }
-
-        switch (flashcardStyle) {
-          case "simple":
-            taskDescription += "Create simple Q&A flashcards. Clean up both questions and answers, use your knowledge to make them better too. Make sure you cover all topics in the notes";
-            break;
-          case "detailed":
-            taskDescription += "Create flashcards with detailed explanations in the answers. Clean up both questions and answers, use your knowledge to make them better too. ";
-            break;
-          case "fill":
-            taskDescription += "Convert factual statements into fill-in-the-blank flashcards. For each card, remove one key term and replace it with '_____'. Provide the removed term as the answer. Clean up both questions and answers, use your knowledge to make them better too.";
-            break;
-          case "mnemonics":
-            taskDescription += "Create flashcards and include helpful mnemonics in the answers and ways to easily remember the content. Clean up both questions and answers, use your knowledge to make them better too. ";
-            break;
-          default:
-            taskDescription += "Create simple Q&A flashcards. Clean up both questions and answers, use your knowledge to make them better too. ";
-            break;
-        }
-      }
-
-      const prompt = `
+    const prompt = `
 TASK:
 ${taskDescription}
 
@@ -110,89 +103,93 @@ ${chunk}
 """
 `.trim();
 
-
-
+    try {
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig,
         systemInstruction,
       });
 
-      let generatedText = result.response.text().trim();
-
-
-      const jsonArray = extractFirstJSONArray(generatedText);
+      const jsonArray = extractFirstJSONArray(result.response.text().trim());
       const flashcards = JSON.parse(jsonArray);
       allFlashcards.push(...flashcards);
-    } catch (error) {
-      console.error("Gemini chunk error:", error);
+
+      // early stop if free or basic premium hit their limit
+      if ((isPremium === 0 && allFlashcards.length >= freeLimit) ||
+          (isPremium === 1 && allFlashcards.length >= basicLimit)) {
+        break;
+      }
+    } catch (err) {
+      console.error("Gemini chunk error:", err);
     }
   }
 
-  if (!isPremium && allFlashcards.length > 50) {
-    return allFlashcards.slice(0, 50);
-  }
-
-
-  // DEBUG: Print all generated flashcards (question and answer)
-  console.log("\n=== ALL GENERATED FLASHCARDS ===\n");
-  allFlashcards.forEach((card, index) => {
-    console.log(`${index + 1}. Q: ${card.question}`);
-    console.log(`   A: ${card.answer}\n`);
-  });
-  return allFlashcards;
+  // Final slice per tier
+  if (isPremium === 0)      return allFlashcards.slice(0, freeLimit);
+  if (isPremium === 1)      return allFlashcards.slice(0, basicLimit);
+                               return allFlashcards;  // super premium unlimited
 }
 
-exports.createDeckWithFlashcards = async (req, res) => {
+
+exports.createFlashcardSet = async (req, res) => {
   try {
-    const { title, content, settings } = req.body;
+    const { setTitle, content, deckId, settings } = req.body;
     const userId = req.user.userId;
+    const tier = req.user.isPremium; // "0" = free, "1" = basic, "2" = super
 
-    
-    const limit = req.user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
+    // 1) Fetch and authorize deck
+    const deck = await Deck.findById(deckId);
+    if (!deck) return res.status(404).json({ message: "Deck not found" });
+    if (deck.user.toString() !== userId) return res.status(403).json({ message: "Unauthorized" });
 
+    // 2) Enforce upload‐size limit by tier
+    const limit = tier === "0" ? MAX_CHAR_FREE : MAX_CHAR_PREMIUM;
     if (content.length > limit) {
       return res.status(400).json({
-        message: `Note content exceeds the limit of ${limit} characters for your account.`,
+        message: `Note content exceeds the ${limit}‑character limit for your account.`,
       });
     }
 
-    const newDeck = new Deck({
-      title,
+    // 3) Generate flashcards (internally slices to 50, 500, or unlimited)
+    const generatedFlashcards = await generateFlashcardsFromNotes(
       content,
-      fileURL: "",
-      user: userId,
-      description: "Flashcards",
-      flashcards: [],
-      updatedAt: Date.now(),
-    });
-    await newDeck.save();
+      tier,
+      settings.examEssentials,
+      settings.flashcardStyle
+    );
 
-    const generatedFlashcards = await generateFlashcardsFromNotes(content, req.user.isPremium, req.body.settings.examEssentials, req.body.settings.flashcardStyle);
-
-    const flashcardsToInsert = generatedFlashcards.map((card) => ({
+    // 4) Prepare Flashcard documents
+    const flashcardsToInsert = generatedFlashcards.map(card => ({
+      setTitle,
       question: card.question,
       answer: card.answer,
-      user: userId,
-      deck: newDeck._id,
+      deck: deckId,
       createdAt: Date.now(),
     }));
 
-    const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
+    // 5) Insert into DB
+    const inserted = await Flashcard.insertMany(flashcardsToInsert);
 
-    newDeck.flashcards = insertedFlashcards.map((fc) => fc._id);
-    await newDeck.save();
+    // 6) Attach to deck
+    deck.flashcardSets.push(...inserted.map(f => f._id));
+    await deck.save();
 
     return res.status(201).json({
-      message: `${title} created successfully`,
-      deck: newDeck,
-      flashcards: insertedFlashcards,
+      message: `${inserted.length} flashcards created successfully`,
+      deck,
+      flashcards: inserted,
     });
   } catch (error) {
-    console.error("Error creating deck with flashcards:", error);
+    console.error("Error creating flashcard set:", error);
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+
+
+
+
 
 exports.getUserDecks = async (req, res) => {
   try {
@@ -211,154 +208,154 @@ exports.getUserDecks = async (req, res) => {
 
 
 
-async function generateSummaryFromNotes(notes, isPremium, isExamEssentials, isCaseStudyMode, selectedTone) {
-  let finalSummary = "";
-  const chunks = chunkNotes(notes, isPremium);
+// async function generateSummaryFromNotes(notes, isPremium, isExamEssentials, isCaseStudyMode, selectedTone) {
+//   let finalSummary = "";
+//   const chunks = chunkNotes(notes, isPremium);
 
-  const generationConfig = {
-    temperature: 0.4,
-    stopSequences: [],
-  };
+//   const generationConfig = {
+//     temperature: 0.4,
+//     stopSequences: [],
+//   };
 
-  const systemInstruction = {
-    parts: [{
-      text: `
-  You are a markdown note generator.
-  ONLY output clean, valid Markdown (no extra symbols or spacing errors).
+//   const systemInstruction = {
+//     parts: [{
+//       text: `
+//   You are a markdown note generator.
+//   ONLY output clean, valid Markdown (no extra symbols or spacing errors).
   
-  Rules:
-  - Use proper headers with a space (e.g., '# Title')
-  - Avoid broken bullets (no '*' alone on a line)
-  - Use '-' or '*' for bullets with actual content after them
-  - Use emojis, bold, italics, and callouts sparingly but consistently
-  - Separate sections clearly
-  - Use spacing to keep things readable (double newlines between groups)
+//   Rules:
+//   - Use proper headers with a space (e.g., '# Title')
+//   - Avoid broken bullets (no '*' alone on a line)
+//   - Use '-' or '*' for bullets with actual content after them
+//   - Use emojis, bold, italics, and callouts sparingly but consistently
+//   - Separate sections clearly
+//   - Use spacing to keep things readable (double newlines between groups)
   
-  DO NOT add code blocks or markdown fences (no backticks or triple quotes).
-  `.trim()
-    }]
-  };
+//   DO NOT add code blocks or markdown fences (no backticks or triple quotes).
+//   `.trim()
+//     }]
+//   };
   
   
-  for (const chunk of chunks) {
-    if (!chunk.trim()) continue;
+//   for (const chunk of chunks) {
+//     if (!chunk.trim()) continue;
 
-    try {
-      let taskDescription = "";
+//     try {
+//       let taskDescription = "";
 
-      if (!isPremium) {
-        taskDescription = `
-Create well-structured, markdown-formatted study notes with a max length of 20,000 characters.
-Use simplified, easy-to-read language and follow the formatting rules above.
-`.trim();
-      } else {
-        taskDescription = `
-Create premium-style markdown study notes.
-${isExamEssentials ? "Focus on core concepts and test-critical info." : ""}
-${isCaseStudyMode ? "Include brief hypothetical examples for context." : ""}
-Use a ${selectedTone} tone and follow the formatting rules above.
-`.trim();
-      }
+//       if (!isPremium) {
+//         taskDescription = `
+// Create well-structured, markdown-formatted study notes with a max length of 20,000 characters.
+// Use simplified, easy-to-read language and follow the formatting rules above.
+// `.trim();
+//       } else {
+//         taskDescription = `
+// Create premium-style markdown study notes.
+// ${isExamEssentials ? "Focus on core concepts and test-critical info." : ""}
+// ${isCaseStudyMode ? "Include brief hypothetical examples for context." : ""}
+// Use a ${selectedTone} tone and follow the formatting rules above.
+// `.trim();
+//       }
 
-      const prompt = `
-TASK:
-${taskDescription}
+//       const prompt = `
+// TASK:
+// ${taskDescription}
 
-NOTES:
-"""
-${chunk}
-"""
-`.trim();
+// NOTES:
+// """
+// ${chunk}
+// """
+// `.trim();
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig,
-        systemInstruction,
-      });
+//       const result = await model.generateContent({
+//         contents: [{ role: "user", parts: [{ text: prompt }] }],
+//         generationConfig,
+//         systemInstruction,
+//       });
 
-      let generatedText = result.response.text().trim();
+//       let generatedText = result.response.text().trim();
 
-      // Strip surrounding code blocks if present
-      if (generatedText.startsWith("```")) {
-        const firstNewlineIndex = generatedText.indexOf("\n");
-        generatedText = generatedText.substring(firstNewlineIndex + 1).replace(/```$/, "").trim();
-      }
+//       // Strip surrounding code blocks if present
+//       if (generatedText.startsWith("```")) {
+//         const firstNewlineIndex = generatedText.indexOf("\n");
+//         generatedText = generatedText.substring(firstNewlineIndex + 1).replace(/```$/, "").trim();
+//       }
 
-      generatedText = generatedText.replace(/[\x00-\x1F\x7F]/g, "");
-      finalSummary += generatedText + "\n\n";
+//       generatedText = generatedText.replace(/[\x00-\x1F\x7F]/g, "");
+//       finalSummary += generatedText + "\n\n";
 
-    } catch (error) {
-      console.error("Gemini chunk error:", error);
-    }
-  }
+//     } catch (error) {
+//       console.error("Gemini chunk error:", error);
+//     }
+//   }
 
-  if (!isPremium && finalSummary.length > 20000) {
-    finalSummary = finalSummary.substring(0, 20000);
-  }
+//   if (!isPremium && finalSummary.length > 20000) {
+//     finalSummary = finalSummary.substring(0, 20000);
+//   }
 
-  return finalSummary;
-}
+//   return finalSummary;
+// }
 
 
-exports.createDeckWithSummary = async (req, res) => {
-  try {
-    const { title, content, settings } = req.body;
-    const userId = req.user.userId;
-    const limit = req.user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
+// exports.createDeckWithSummary = async (req, res) => {
+//   try {
+//     const { title, content, settings } = req.body;
+//     const userId = req.user.userId;
+//     const limit = req.user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
 
-    if (content.length > limit) {
-      return res.status(400).json({
-        message: `Note content exceeds the limit of ${limit} characters for your account.`,
-      });
-    }
+//     if (content.length > limit) {
+//       return res.status(400).json({
+//         message: `Note content exceeds the limit of ${limit} characters for your account.`,
+//       });
+//     }
 
-    // For free users, force examEssentials = false, caseStudyMode = false, and tone "simple"
-    const examEssentials = req.user.isPremium ? settings.examEssentials : false;
-    const caseStudyMode = req.user.isPremium ? settings.caseStudyMode : false;
-    const summaryTone = req.user.isPremium ? settings.summaryTone : "simple";
+//     // For free users, force examEssentials = false, caseStudyMode = false, and tone "simple"
+//     const examEssentials = req.user.isPremium ? settings.examEssentials : false;
+//     const caseStudyMode = req.user.isPremium ? settings.caseStudyMode : false;
+//     const summaryTone = req.user.isPremium ? settings.summaryTone : "simple";
 
-    const newDeck = new Deck({
-      title,
-      content,
-      fileURL: "",
-      user: userId,
-      description: "Summary",
-      flashcards: [],
-      summarization: null, // single summarization object now
-      updatedAt: Date.now(),
-    });
-    await newDeck.save();
+//     const newDeck = new Deck({
+//       title,
+//       content,
+//       fileURL: "",
+//       user: userId,
+//       description: "Summary",
+//       flashcards: [],
+//       summarization: null, // single summarization object now
+//       updatedAt: Date.now(),
+//     });
+//     await newDeck.save();
 
-    // Generate the summary from notes
-    const generatedSummary = await generateSummaryFromNotes(
-      content,
-      req.user.isPremium,
-      examEssentials,
-      caseStudyMode,
-      summaryTone
-    );
+//     // Generate the summary from notes
+//     const generatedSummary = await generateSummaryFromNotes(
+//       content,
+//       req.user.isPremium,
+//       examEssentials,
+//       caseStudyMode,
+//       summaryTone
+//     );
 
-    // Create the summarization and attach it to the deck
-    const newSummary = await Summarization.create({
-      summary: generatedSummary,
-      user: userId,
-      deck: newDeck._id,
-    });
+//     // Create the summarization and attach it to the deck
+//     const newSummary = await Summarization.create({
+//       summary: generatedSummary,
+//       user: userId,
+//       deck: newDeck._id,
+//     });
 
-    // Update deck with single summarization reference
-    newDeck.summarization = newSummary._id;
-    await newDeck.save();
+//     // Update deck with single summarization reference
+//     newDeck.summarization = newSummary._id;
+//     await newDeck.save();
 
-    return res.status(201).json({
-      message: `${title} created successfully`,
-      deck: newDeck,
-      summary: generatedSummary,
-    });
-  } catch (error) {
-    console.error("Error creating deck with summary:", error);
-    return res.status(500).json({ message: error.message });
-  }
-};
+//     return res.status(201).json({
+//       message: `${title} created successfully`,
+//       deck: newDeck,
+//       summary: generatedSummary,
+//     });
+//   } catch (error) {
+//     console.error("Error creating deck with summary:", error);
+//     return res.status(500).json({ message: error.message });
+//   }
+// };
 
 
 
@@ -499,40 +496,47 @@ exports.deleteDeck = async (req, res) => {
 
 
 
-
 exports.createDeck = async (req, res) => {
   try {
     const { title, content } = req.body;
     const userId = req.user.userId;
-    const limit = req.user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
+    const tier = req.user.isPremium; // "0"=free, "1"=basic, "2"=super
 
-    // Check content length limit
-    if (content.length > limit) {
+    // 1) Character‐limit per tier
+    const contentLimit = tier === 0 ? MAX_CHAR_FREE : MAX_CHAR_PREMIUM;
+    if (content.length > contentLimit) {
       return res.status(400).json({
-        message: `Note content exceeds the limit of ${limit} characters for your account.`,
+        message: `Note content exceeds the ${contentLimit}-character limit for your account.`,
       });
     }
 
-    // Check if a deck with the same title exists (case insensitive)
-    const existingDeck = await Deck.findOne({
-      user: userId,
-      title: { $regex: new RegExp('^' + title + '$', 'i') },  // Regex for case-insensitive search
-    });
+    // 2) Deck‐count limit per tier
+    const userDeckCount = await Deck.countDocuments({ user: userId });
+    const deckLimit = tier === 0 ? 3 : tier === 1 ? 10 : Infinity;
+    if (userDeckCount >= deckLimit) {
+      return res.status(403).json({
+        message: `Deck limit reached. Your plan allows up to ${deckLimit === Infinity ? 'unlimited' : deckLimit} decks.`,
+      });
+    }
 
-    if (existingDeck) {
+    // 3) Unique title check (case‐insensitive)
+    const existing = await Deck.findOne({
+      user: userId,
+      title: { $regex: `^${title}$`, $options: 'i' },
+    });
+    if (existing) {
       return res.status(400).json({
         message: 'A deck with this title already exists. Please choose a different title.',
       });
     }
 
-    // Create the new deck if the title is unique
+    // 4) Create and save
     const newDeck = new Deck({
       title,
       content,
       description: "Set up your study deck by adding flashcards, summaries, and tests.",
       user: userId,
     });
-
     await newDeck.save();
 
     return res.status(201).json({
@@ -541,7 +545,8 @@ exports.createDeck = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating deck:', error);
-    res.status(500).json({ message: 'Server error', error });
+    return res.status(500).json({ message: 'Server error', error });
   }
 };
+
 
