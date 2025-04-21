@@ -20,9 +20,9 @@ const deckSchema = new Schema({
     required: true 
   },
   // References to related flashcards
-  flashcards: [{
+  flashcardSets: [{
     type: Schema.Types.ObjectId,
-    ref: 'Flashcard'
+    ref: 'FlashcardSet'
   }],
   // References to generated quizzes
   quizzes: [{

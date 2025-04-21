@@ -13,6 +13,7 @@ router.get('/user-decks', authMiddleware, deckController.getUserDecks);
 router.get('/:id', authMiddleware, deckController.getDeckById);
 router.patch('/:id', authMiddleware, deckController.renameDeck);
 router.delete('/:id', authMiddleware, deckController.deleteDeck);
+router.post('/create-deck', authMiddleware, deckController.createDeck);
 
 
 

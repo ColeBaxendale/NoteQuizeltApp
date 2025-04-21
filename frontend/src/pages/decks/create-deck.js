@@ -2,67 +2,56 @@
 import "./create-deck.css";
 import Swal from "sweetalert2";
 import wand from "../../assets/wand.png";
-import React, { useEffect, useState } from "react";
+import React, { useState, useContext } from "react";
 import API from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import Navbar from "../../components/navbar/navbar.js";
-
+import { AuthContext } from "../../utils/AuthContext.js";
 const CreateDeck = () => {
-  const [user, setUser] = useState(null);
+  const { user } = useContext(AuthContext);
   const [notes, setNotes] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Define limits (in characters)
   const MAX_CHAR_FREE = 40000;
   const MAX_CHAR_PREMIUM = 100000;
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await API.get("/auth/user");
-        setUser(response.data);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-        navigate("/account");
-      }
-    };
-
-    fetchUser();
-  }, [navigate]);
 
   const handleUpgrade = () => {
     console.log("stripe");
   };
 
   const handleBack = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Your new deck will NOT be saved.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, go back",
-      cancelButtonText: "Stay here",
-      reverseButtons: true,
-      customClass: {
-        popup: "swal-custom-popup",
-        confirmButton: "swal-confirm-button",
-        cancelButton: "swal-cancel-button",
-        title: "swal-title",
-        htmlContainer: "swal-text",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
+    if (!title.trim() && !notes.trim()) {
         navigate("/dashboard");
-      }
-    });
+        
+    }
+    else{
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Your new deck will NOT be saved.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, go back",
+            cancelButtonText: "Stay here",
+            reverseButtons: true,
+            customClass: {
+              popup: "swal-custom-popup",
+              confirmButton: "swal-confirm-button",
+              cancelButton: "swal-cancel-button",
+              title: "swal-title",
+              htmlContainer: "swal-text",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/dashboard");
+            }
+          });
+        }
   };
 
-  // Dynamically enforce character limit in the onChange handler
   const handleNotesChange = (e) => {
     let value = e.target.value;
     if (user) {
@@ -74,14 +63,18 @@ const CreateDeck = () => {
     setNotes(value);
   };
 
-  // Determine the current limit, default to free limit if user not loaded yet
   const currentLimit = user ? (user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE) : MAX_CHAR_FREE;
 
-  const handleGenerateFlashcards = async () => {
+  const handleCreateDeck = async () => {
     if (!title.trim()) {
       toast.error("Please enter a title for the study set.");
       return;
     }
+
+    if (title.length > 100) {
+        toast.error("Title is too long.");
+        return;
+      }
 
     if (notes.trim().length < 100) {
       toast.error("Your notes must be at least 100 characters long.");
@@ -98,15 +91,11 @@ const CreateDeck = () => {
       const payload = {
         title,
         content: notes,
-        settings: {
-        },
       };
-      const response = await API.post("/deck/create-deck-flashcards", payload);
-      toast.success(response.data.message || `${title} created successfully`);
+       await API.post("/deck/create-deck", payload);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error generating flashcards:", error);
-      toast.error(error.response?.data?.message || "An error occurred while generating flashcards.");
+      toast.error(error.response?.data?.message || "An error occurred while creating the new deck.");
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +116,7 @@ const CreateDeck = () => {
         <div className="create-deck-content-container">
           <div className="create-deck-content-container-title">
             <label className="create-deck-content-notes-label-text">Deck Title</label>
-            <input className="create-deck-content-notes-title" type="text" placeholder="Enter a title for this set." value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input className="create-deck-content-notes-title" type="text" maxLength={100} placeholder="Enter a title for this set." value={title} onChange={(e) => setTitle(e.target.value)} />
             <div className="label-row-deck">
             <label className="create-deck-content-notes-label-text">Input Notes</label>
 
@@ -148,7 +137,7 @@ const CreateDeck = () => {
                 <button className="create-deck-bottom-cancel" onClick={handleBack}>
                   Cancel
                 </button>
-                <button className="create-deck-bottom-submit" onClick={handleGenerateFlashcards}>
+                <button className="create-deck-bottom-submit" onClick={handleCreateDeck}>
                   <img src={wand} alt="Generate" className="create-deck-bottom-submit-logo" />
                   Create Deck
                 </button>

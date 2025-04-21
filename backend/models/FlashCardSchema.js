@@ -2,25 +2,32 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const flashcardSchema = new Schema({
-  question: { 
+  setTitle: { 
     type: String, 
     required: true 
   },
-  answer: { 
-    type: String, 
-    required: true 
-  },
-  user: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  },
+
+  length:{
+    type: Number,
+    required: true
+  }, 
+
+  flashcards: [{
+    question: { 
+      type: String, 
+      required: true 
+    },
+    answer: { 
+      type: String, 
+      required: true 
+    }
+  }],
   deck: { 
     type: Schema.Types.ObjectId, 
     ref: 'Deck', 
     required: true 
-  },
+  }
 });
 
-const Flashcard = mongoose.model('Flashcard', flashcardSchema);
-module.exports = Flashcard;
+const FlashcardSet = mongoose.model('FlashcardSet', flashcardSchema);
+module.exports = FlashcardSet;

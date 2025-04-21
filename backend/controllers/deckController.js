@@ -361,27 +361,58 @@ exports.createDeckWithSummary = async (req, res) => {
 };
 
 
+
+
+
+
+
 exports.getDeckById = async (req, res) => {
   try {
     const deck = await Deck.findById(req.params.id)
-      .populate("flashcards")
-      .populate("summarization")
-      .populate("quizzes"); 
+      .populate({
+        path: 'flashcardSets',
+        select: 'setTitle length' // Only populate setTitle and flashcards reference
+      })
+      .populate('summarization')  // Populate summarization details
+      .populate('quizzes');  // Populate quizzes details
 
     if (!deck) {
-      return res.status(404).json({ message: "Deck not found" });
+      return res.status(404).json({ message: 'Deck not found' });
     }
 
+    // Check if the user is authorized to access this deck
     if (deck.user.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.status(403).json({ message: 'Unauthorized' });
     }
+    deck.flashcardSets.forEach(set => {
+      console.log(`Flashcard Set Title: ${set.setTitle}`);
+      console.log(`Flashcard Length: ${set.length}`);
 
-    res.status(200).json(deck);
+    });
+    // Add length of flashcards to each flashcardSet
+    const flashcardSetsWithLength = deck.flashcardSets.map(set => ({
+      setTitle: set.setTitle,
+      flashcardsLength: set.flashcards.length // Get the length of flashcards
+      
+    }));
+
+    // Return deck info with flashcard sets metadata (titles and lengths)
+    res.status(200).json({
+      ...deck.toObject(),
+      flashcardSets: flashcardSetsWithLength
+    });
   } catch (error) {
-    console.error("Error fetching deck:", error);
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching deck:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 };
+
+
+
+
+
+
+
 
 
 exports.renameDeck = async (req, res) => {
@@ -431,6 +462,10 @@ exports.renameDeck = async (req, res) => {
 
 
 
+
+
+
+
 exports.deleteDeck = async (req, res) => {
   try {
     // Get deck id from the route params
@@ -458,4 +493,55 @@ exports.deleteDeck = async (req, res) => {
   }
 };
 
+
+
+
+
+
+
+
+exports.createDeck = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const userId = req.user.userId;
+    const limit = req.user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
+
+    // Check content length limit
+    if (content.length > limit) {
+      return res.status(400).json({
+        message: `Note content exceeds the limit of ${limit} characters for your account.`,
+      });
+    }
+
+    // Check if a deck with the same title exists (case insensitive)
+    const existingDeck = await Deck.findOne({
+      user: userId,
+      title: { $regex: new RegExp('^' + title + '$', 'i') },  // Regex for case-insensitive search
+    });
+
+    if (existingDeck) {
+      return res.status(400).json({
+        message: 'A deck with this title already exists. Please choose a different title.',
+      });
+    }
+
+    // Create the new deck if the title is unique
+    const newDeck = new Deck({
+      title,
+      content,
+      description: "Set up your study deck by adding flashcards, summaries, and tests.",
+      user: userId,
+    });
+
+    await newDeck.save();
+
+    return res.status(201).json({
+      message: 'Deck created successfully!',
+      deck: newDeck,
+    });
+  } catch (error) {
+    console.error('Error creating deck:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
