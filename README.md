@@ -5,7 +5,7 @@
     - Work on the view deck page, 
     - load in title and length for the flashcard sets and display the list of flashcards
     - load in title and length for summaries sets and display the list of summaries
-    - load in title type of test and most recent grade  and display lest of tests
+    - load in title type of test and most recent grade and display lest of tests
 
 
 
