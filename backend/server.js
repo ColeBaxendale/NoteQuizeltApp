@@ -46,3 +46,18 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // ✅ Start the server
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
+app._router.stack.forEach((mw) => {
+  if (mw.route) {
+    // routes registered directly on app
+    console.log("APP ROUTE:", mw.route.path, mw.route.methods);
+  } else if (mw.name === "router") {
+    // router middleware 
+    mw.handle.stack.forEach((handler) => {
+      const route = handler.route;
+      if (route) {
+        console.log("  ROUTE:", route.path, route.methods);
+      }
+    });
+  }
+});

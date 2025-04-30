@@ -2,7 +2,7 @@ const OpenAI = require("openai");
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Deck = require("../models/DeckSchema");
-const Flashcard = require("../models/FlashCardSchema");
+const FlashcardSet = require("../models/FlashCardSchema");
 const Summarization = require("../models/SummarizationSchema");
 const Quiz = require("../models/QuizSchema");
 
@@ -11,7 +11,7 @@ require("dotenv").config();
 const MAX_CHAR_FREE = 40000;
 const MAX_CHAR_PREMIUM = 100000;
 const FREE_CHUNK_SIZE = 20000; // Max 2 chunks for free
-const PREMIUM_CHUNK_SIZE = 6000;
+const PREMIUM_CHUNK_SIZE = 5000;
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
@@ -48,21 +48,24 @@ async function generateFlashcardsFromNotes(notes, isPremium, isExamEssentials, f
   const chunks = chunkNotes(notes, isPremium);
 
   // Tiered limits
-  const freeLimit    = 50;
-  const basicLimit   = 500;
+  const freeLimit = 50;
+  const basicLimit = 500;
   // super premium has no limit
 
   const generationConfig = { temperature: 0, stopSequences: [] };
   const systemInstruction = {
-    parts: [{
-      text: `
-You are a flashcard generator. Your ONLY task is to create flashcards in the requested format.
+    parts: [
+      {
+        text: `
+You are a flashcard generator. Your ONLY task is to clean up notes to generate flashcards in the requested format.
 NEVER introduce yourself or reply conversationally.
 NEVER include extra text or explanations.
 NEVER INCLUDE MARKDOWN.
+YOU MAY CHANGE AND ADD INFORMATION WHERE NEED BE.
 ONLY return a valid JSON array following this EXACT structure: [{"question": "string", "answer": "string"}].
-      `.trim()
-    }]
+      `.trim(),
+      },
+    ],
   };
 
   for (const chunk of chunks) {
@@ -70,28 +73,44 @@ ONLY return a valid JSON array following this EXACT structure: [{"question": "st
 
     let taskDescription = "";
 
-    if (isPremium === 0) {
-      taskDescription = `Create no more than ${freeLimit} simple Q&A flashcards focused on the most critical topics.`;
-    } else if (isPremium === 1) {
-      taskDescription = `Create no more than ${basicLimit} flashcards. `;
-      if (isExamEssentials) taskDescription += "Focus on key facts and core concepts for exam preparation. ";
-      // then style-based append…
-      switch (flashcardStyle) {
-        case "simple":
-          taskDescription += "Use simple Q&A. Clean up questions and answers.";
-          break;
-        // … other cases identical to before
-      }
-    } else { // "2"
-      if (isExamEssentials) taskDescription += "Focus on key facts and core concepts for exam preparation. ";
-      // style-based append…
-      switch (flashcardStyle) {
-        case "simple":
-          taskDescription += "Create simple Q&A flashcards.";
-          break;
-        // … others
-      }
+
+    switch (isPremium) {
+      case 0:
+        // Free users
+        taskDescription = `Create no more than ${freeLimit + 3} simple Q&A flashcards focused on the most critical topics.`;
+        break;
+
+      case 1:
+      case 2:
+        // Basic (1) and Premium (2) users share styles,
+        // but differ on that limit vs unlimited
+        if (isPremium === 1) {
+          taskDescription = `Create no more than ${basicLimit} flashcards. `;
+        } else {
+          taskDescription = `Create as many flashcards as you need. `;
+          if (isExamEssentials) {
+            taskDescription += "The test is in 24 hours—ONLY create flashcards on key facts and core concepts for exam preparation that I can learn in that time frame. ";
+          }
+        }
+
+        // append style‐based instructions
+        switch (flashcardStyle) {
+          case "simple":
+            taskDescription += "Use simple Q&A. Clean up questions and answers.";
+            break;
+          case "fill":
+            taskDescription += "Create cloze (fill-in-the-blank) style flashcards.";
+            break;
+          case "detailed":
+            taskDescription += "Include in-depth explanations and examples on each flashcard for comprehensive understanding.";
+            break;
+          case "mnemonics":
+            taskDescription += "Include mnemonics to help retention.";
+            break;
+          // …other styles
+        }
     }
+
 
     const prompt = `
 TASK:
@@ -115,8 +134,7 @@ ${chunk}
       allFlashcards.push(...flashcards);
 
       // early stop if free or basic premium hit their limit
-      if ((isPremium === 0 && allFlashcards.length >= freeLimit) ||
-          (isPremium === 1 && allFlashcards.length >= basicLimit)) {
+      if ((isPremium === 0 && allFlashcards.length >= freeLimit) || (isPremium === 1 && allFlashcards.length >= basicLimit)) {
         break;
       }
     } catch (err) {
@@ -125,71 +143,48 @@ ${chunk}
   }
 
   // Final slice per tier
-  if (isPremium === 0)      return allFlashcards.slice(0, freeLimit);
-  if (isPremium === 1)      return allFlashcards.slice(0, basicLimit);
-                               return allFlashcards;  // super premium unlimited
+  if (isPremium === 0) return allFlashcards.slice(0, freeLimit);
+  if (isPremium === 1) return allFlashcards.slice(0, basicLimit);
+  return allFlashcards; // super premium unlimited
 }
-
 
 exports.createFlashcardSet = async (req, res) => {
   try {
-    const { setTitle, content, deckId, settings } = req.body;
+    const { setTitle, deckId, settings } = req.body;
     const userId = req.user.userId;
-    const tier = req.user.isPremium; // "0" = free, "1" = basic, "2" = super
+    const tier = req.user.isPremium; // 0=free, 1=basic, 2=super
 
-    // 1) Fetch and authorize deck
+    // 1) Fetch & authorize deck
     const deck = await Deck.findById(deckId);
     if (!deck) return res.status(404).json({ message: "Deck not found" });
-    if (deck.user.toString() !== userId) return res.status(403).json({ message: "Unauthorized" });
-
-    // 2) Enforce upload‐size limit by tier
-    const limit = tier === "0" ? MAX_CHAR_FREE : MAX_CHAR_PREMIUM;
-    if (content.length > limit) {
-      return res.status(400).json({
-        message: `Note content exceeds the ${limit}‑character limit for your account.`,
-      });
+    if (deck.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // 3) Generate flashcards (internally slices to 50, 500, or unlimited)
-    const generatedFlashcards = await generateFlashcardsFromNotes(
-      content,
-      tier,
-      settings.examEssentials,
-      settings.flashcardStyle
-    );
+    // 2) Generate flashcards from deck.content
+    const generated = await generateFlashcardsFromNotes(deck.content, tier, settings.examEssentials, settings.flashcardStyle);
 
-    // 4) Prepare Flashcard documents
-    const flashcardsToInsert = generatedFlashcards.map(card => ({
+    // 3) Create a new FlashcardSet document
+    const newSet = await FlashcardSet.create({
       setTitle,
-      question: card.question,
-      answer: card.answer,
+      length: generated.length, // satisfy required `length`
+      flashcards: generated, // [{ question, answer }, …]
       deck: deckId,
-      createdAt: Date.now(),
-    }));
+    });
 
-    // 5) Insert into DB
-    const inserted = await Flashcard.insertMany(flashcardsToInsert);
-
-    // 6) Attach to deck
-    deck.flashcardSets.push(...inserted.map(f => f._id));
+    // 4) Attach to deck and save
+    deck.flashcardSets.push(newSet._id);
     await deck.save();
 
     return res.status(201).json({
-      message: `${inserted.length} flashcards created successfully`,
-      deck,
-      flashcards: inserted,
+      message: "Flashcard set created successfully",
+      flashcardSet: newSet,
     });
-  } catch (error) {
-    console.error("Error creating flashcard set:", error);
-    return res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error("Error creating flashcard set:", err);
+    return res.status(500).json({ message: err.message });
   }
 };
-
-
-
-
-
-
 
 exports.getUserDecks = async (req, res) => {
   try {
@@ -201,12 +196,6 @@ exports.getUserDecks = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
-
-
 
 // async function generateSummaryFromNotes(notes, isPremium, isExamEssentials, isCaseStudyMode, selectedTone) {
 //   let finalSummary = "";
@@ -222,7 +211,7 @@ exports.getUserDecks = async (req, res) => {
 //       text: `
 //   You are a markdown note generator.
 //   ONLY output clean, valid Markdown (no extra symbols or spacing errors).
-  
+
 //   Rules:
 //   - Use proper headers with a space (e.g., '# Title')
 //   - Avoid broken bullets (no '*' alone on a line)
@@ -230,13 +219,12 @@ exports.getUserDecks = async (req, res) => {
 //   - Use emojis, bold, italics, and callouts sparingly but consistently
 //   - Separate sections clearly
 //   - Use spacing to keep things readable (double newlines between groups)
-  
+
 //   DO NOT add code blocks or markdown fences (no backticks or triple quotes).
 //   `.trim()
 //     }]
 //   };
-  
-  
+
 //   for (const chunk of chunks) {
 //     if (!chunk.trim()) continue;
 
@@ -295,7 +283,6 @@ exports.getUserDecks = async (req, res) => {
 
 //   return finalSummary;
 // }
-
 
 // exports.createDeckWithSummary = async (req, res) => {
 //   try {
@@ -357,60 +344,42 @@ exports.getUserDecks = async (req, res) => {
 //   }
 // };
 
-
-
-
-
-
-
 exports.getDeckById = async (req, res) => {
   try {
-    const deck = await Deck.findById(req.params.id)
-      .populate({
-        path: 'flashcardSets',
-        select: 'setTitle length' // Only populate setTitle and flashcards reference
-      })
-      .populate('summarization')  // Populate summarization details
-      .populate('quizzes');  // Populate quizzes details
+    const deck = await Deck.findById(req.params.id).populate("flashcardSets", "setTitle length").populate("summarizations", "title").populate("quizSets", "title");
 
-    if (!deck) {
-      return res.status(404).json({ message: 'Deck not found' });
-    }
-
-    // Check if the user is authorized to access this deck
+    if (!deck) return res.status(404).json({ message: "Deck not found" });
     if (deck.user.toString() !== req.user.userId) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(403).json({ message: "Unauthorized" });
     }
-    deck.flashcardSets.forEach(set => {
-      console.log(`Flashcard Set Title: ${set.setTitle}`);
-      console.log(`Flashcard Length: ${set.length}`);
 
-    });
-    // Add length of flashcards to each flashcardSet
-    const flashcardSetsWithLength = deck.flashcardSets.map(set => ({
-      setTitle: set.setTitle,
-      flashcardsLength: set.flashcards.length // Get the length of flashcards
-      
+    // guard with empty‐array fallback
+    const flashcardSets = (deck.flashcardSets || []).map((f) => ({
+      id: f._id,
+      setTitle: f.setTitle,
+      flashcardCount: f.length,
     }));
 
-    // Return deck info with flashcard sets metadata (titles and lengths)
-    res.status(200).json({
-      ...deck.toObject(),
-      flashcardSets: flashcardSetsWithLength
+    const summarization = (deck.summarizations || [])[0] ? { id: deck.summarizations[0]._id, title: deck.summarizations[0].title } : null;
+
+    const quizzes = (deck.quizSets || []).map((q) => ({
+      id: q._id,
+      title: q.title,
+    }));
+
+    return res.status(200).json({
+      id: deck._id,
+      title: deck.title,
+      flashcardSets,
+      summarization,
+      quizzes,
+      updatedAt: deck.updatedAt,
     });
   } catch (error) {
-    console.error('Error fetching deck:', error);
-    res.status(500).json({ message: 'Server error', error });
+    console.error("Error fetching deck:", error);
+    return res.status(500).json({ message: "Server error", error });
   }
 };
-
-
-
-
-
-
-
-
 
 exports.renameDeck = async (req, res) => {
   const deckId = req.params.id;
@@ -457,44 +426,31 @@ exports.renameDeck = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
 exports.deleteDeck = async (req, res) => {
   try {
     // Get deck id from the route params
     const deckId = req.params.id;
     // Get user id from the authenticated user object
     const userId = req.user.userId;
-    
+
     // Ensure the deck belongs to the authenticated user
     const deletedDeck = await Deck.findOneAndDelete({ _id: deckId, user: userId });
-    
+
     if (!deletedDeck) {
-      console.log("Deck not found or not owned by user.");
-      return res.status(404).json({ message: 'Deck not found' });
+      return res.status(404).json({ message: "Deck not found" });
     }
-    
+
     // Cascade delete associated flashcards, quizzes, and summarization
     await Flashcard.deleteMany({ deck: deckId });
     await Quiz.deleteMany({ deck: deckId });
     await Summarization.deleteOne({ deck: deckId });
-    
-    res.status(200).json({ message: 'Deck and all associated data deleted successfully' });
+
+    res.status(200).json({ message: "Deck and all associated data deleted successfully" });
   } catch (error) {
     console.error("Error deleting deck:", error);
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
-
-
-
-
-
-
 
 exports.createDeck = async (req, res) => {
   try {
@@ -515,18 +471,18 @@ exports.createDeck = async (req, res) => {
     const deckLimit = tier === 0 ? 3 : tier === 1 ? 10 : Infinity;
     if (userDeckCount >= deckLimit) {
       return res.status(403).json({
-        message: `Deck limit reached. Your plan allows up to ${deckLimit === Infinity ? 'unlimited' : deckLimit} decks.`,
+        message: `Deck limit reached. Your plan allows up to ${deckLimit === Infinity ? "unlimited" : deckLimit} decks.`,
       });
     }
 
     // 3) Unique title check (case‐insensitive)
     const existing = await Deck.findOne({
       user: userId,
-      title: { $regex: `^${title}$`, $options: 'i' },
+      title: { $regex: `^${title}$`, $options: "i" },
     });
     if (existing) {
       return res.status(400).json({
-        message: 'A deck with this title already exists. Please choose a different title.',
+        message: "A deck with this title already exists. Please choose a different title.",
       });
     }
 
@@ -540,13 +496,11 @@ exports.createDeck = async (req, res) => {
     await newDeck.save();
 
     return res.status(201).json({
-      message: 'Deck created successfully!',
+      message: "Deck created successfully!",
       deck: newDeck,
     });
   } catch (error) {
-    console.error('Error creating deck:', error);
-    return res.status(500).json({ message: 'Server error', error });
+    console.error("Error creating deck:", error);
+    return res.status(500).json({ message: "Server error", error });
   }
 };
-
-

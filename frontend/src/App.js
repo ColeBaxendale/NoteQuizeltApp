@@ -10,6 +10,7 @@ import ViewDeck from "./pages/decks/view-deck";
 import LoadingScreen from "./pages/auths/loading";
 import Account from "./pages/auths/account";
 import CreateDeck from "./pages/decks/create-deck";
+import TempFlashCard from "./pages/decks/tempflashcards";
 
 const App = () => {
   return (
@@ -28,13 +29,22 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/create-flashcards"
+
+<Route
+          path="/deck/:deckId/flashcards/create"
+          element={
+          <ProtectedRoute>
+          <CreateFlashCards/>
+          </ProtectedRoute>}
+        />
+
+<Route
+          path="/flashcards/:setId"
+
           element={
             <ProtectedRoute>
-              <CreateFlashCards />
-            </ProtectedRoute>
-          }
+          <TempFlashCard/>
+          </ProtectedRoute>}
         />
 
 <Route

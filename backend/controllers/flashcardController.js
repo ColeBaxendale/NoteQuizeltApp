@@ -1,104 +1,282 @@
 // controllers/flashcardsController.js
-const Flashcard = require("../models/FlashCardSchema");
+const FlashcardSet = require("../models/FlashCardSchema");
 const Deck = require('../models/DeckSchema');
 
+// controllers/flashcardsController.js
+
 exports.updateFlashcard = async (req, res) => {
-  const { flashcardId } = req.params;
-  const updateData = req.body; // e.g. { question: "new question" } or { answer: "new answer" }
+  const { setId, flashcardId } = req.params;
+  const updateData = req.body;        // e.g. { question: "new?" }
+  const userId     = req.user.userId; // from your auth middleware
 
   try {
-    const flashcard = await Flashcard.findById(flashcardId);
-    if (!flashcard) {
-      return res.status(404).json({ message: "Flashcard not found" });
+    // 1) Load the set and its deck-owner for auth
+    const set = await FlashcardSet.findById(setId)
+      .populate({ path: "deck", select: "user" });
+    if (!set) {
+      return res
+        .status(404)
+        .json({ message: "Flashcard set not found" });
+    }
+    if (set.deck.user.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized" });
     }
 
-    // Check authorization
-    if (flashcard.user.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Unauthorized" });
+    // 2) Perform the subdoc update
+    const updatedSet = await FlashcardSet.findOneAndUpdate(
+      { 
+        _id: setId, 
+        "flashcards._id": flashcardId 
+      },
+      {
+        $set: {
+          // Map each field → its positional path
+          ...Object.entries(updateData).reduce((acc, [key, val]) => {
+            acc[`flashcards.$.${key}`] = val;
+            return acc;
+          }, {}),
+          updatedAt: Date.now()
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedSet) {
+      // The card ID wasn’t found in that set
+      return res
+        .status(404)
+        .json({ message: "Flashcard not found in set" });
     }
 
-    // Update flashcard fields
-    Object.keys(updateData).forEach((field) => {
-      flashcard[field] = updateData[field];
+    // 3) Bump the parent Deck’s updatedAt
+    await Deck.findByIdAndUpdate(set.deck._id, {
+      updatedAt: Date.now()
     });
-    await flashcard.save();
 
-    // Update the deck's updatedAt field
-    await Deck.findByIdAndUpdate(flashcard.deck, { updatedAt: Date.now() });
+    // 4) Extract and return the updated subdocument
+    const updatedFlashcard = updatedSet.flashcards.id(flashcardId);
+    return res.json({
+      message: "Flashcard updated",
+      flashcard: updatedFlashcard
+    });
 
-    res.status(200).json({ message: "Flashcard updated", flashcard });
   } catch (error) {
     console.error("Error updating flashcard:", error);
-    res.status(500).json({ message: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error" });
   }
 };
 
-exports.deleteFlashcard = async (req, res) => {
-  const { flashcardId } = req.params;
-  try {
-    const flashcard = await Flashcard.findById(flashcardId);
-    if (!flashcard) {
-      return res.status(404).json({ message: "Flashcard not found" });
-    }
 
-    // Check if the user is authorized to delete this flashcard
-    if (flashcard.user.toString() !== req.user.userId) {
+// controllers/flashcardsController.js
+
+exports.deleteFlashcard = async (req, res) => {
+  const { setId, flashcardId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    // 1) Load the set and its deck-owner to enforce auth
+    const set = await FlashcardSet.findById(setId).populate({
+      path: "deck",
+      select: "user"
+    });
+    if (!set) {
+      return res.status(404).json({ message: "Flashcard set not found" });
+    }
+    if (set.deck.user.toString() !== userId) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // Remove the flashcard reference from its Deck and update updatedAt.
-    // Set new: true so we get the updated deck document.
-    const updatedDeck = await Deck.findByIdAndUpdate(
-      flashcard.deck,
+    // 2) Now remove the subdoc, adjust length, stamp updatedAt
+    const updatedSet = await FlashcardSet.findByIdAndUpdate(
+      setId,
       {
-        $pull: { flashcards: flashcard._id },
-        $set: { updatedAt: Date.now() }
+        $pull: { flashcards: { _id: flashcardId } },
+        $inc:  { length: -1 },
+        $set:  { updatedAt: Date.now() }
       },
       { new: true }
     );
 
-    await flashcard.deleteOne();
+    if (!updatedSet) {
+      // flashcardId wasn’t in the array
+      return res.status(404).json({ message: "Flashcard not found in set" });
+    }
 
-    res.status(200).json({ message: "Flashcard deleted" });
+    // 3) Also bump the parent Deck’s updatedAt
+    await Deck.findByIdAndUpdate(set.deck._id, { updatedAt: Date.now() });
+
+    return res.json({ message: "Flashcard deleted" });
   } catch (error) {
     console.error("Error deleting flashcard:", error);
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
+
+
   
 
   
-  exports.createFlashcard = async (req, res) => {
-    try {
-      const { question, answer, deck } = req.body;
-      const userId = req.user.userId; // Set by your auth middleware
+// controllers/flashcardsController.js
+
+exports.createFlashcard = async (req, res) => {
+  const { setId } = req.params;           // <-- from URL, not body
+  const { question, answer } = req.body;
+  const userId = req.user.userId;
+
+  // 1) Validate
+  if (!question?.trim() || !answer?.trim()) {
+    return res.status(400).json({ message: "Question and answer are required" });
+  }
+
+  try {
+    // 2) Load the set and its deck-owner
+    const set = await FlashcardSet.findById(setId)
+      .populate({ path: "deck", select: "user" });
+    if (!set) {
+      return res.status(404).json({ message: "Flashcard set not found" });
+    }
+    if (set.deck.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // 3) Push the new card
+    const updatedSet = await FlashcardSet.findByIdAndUpdate(
+      setId,
+      {
+        $push: { flashcards: { question, answer } },
+        $inc:  { length: 1 },
+        $set:  { updatedAt: Date.now() }
+      },
+      { new: true, runValidators: true }
+    );
+
+    // 4) Bump the parent Deck’s updatedAt
+    await Deck.findByIdAndUpdate(set.deck._id, { updatedAt: Date.now() });
+
+    // 5) Grab the last‐pushed flashcard
+    const newFlashcard = updatedSet.flashcards.at(-1);
+
+    return res.status(201).json({
+      message: "Flashcard created",
+      flashcard: newFlashcard
+    });
+  } catch (error) {
+    console.error("Error creating flashcard:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+  exports.getFlashcards = async (req, res) => {
+    const { setId } = req.params;
+    const userId    = req.user.userId;
   
-      // Validate required fields
-      if (!question || !answer || !deck) {
-        return res.status(400).json({ message: "Missing required fields" });
+    try {
+      // 1) Fetch the FlashcardSet and populate its deck
+      const set = await FlashcardSet.findById(setId)
+        .populate({ 
+          path: "deck", 
+          select: "title user" 
+        });
+  
+      if (!set) {
+        return res.status(404).json({ message: "Flashcard set not found" });
       }
   
-      // Create new flashcard document
-      const newFlashcard = new Flashcard({
-        question,
-        answer,
-        deck,
-        user: userId,
+      // 2) Authorization: only owner of the deck may view
+      if (set.deck.user.toString() !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+  
+      // 3) Send back the set metadata and cards
+      return res.status(200).json({
+        id:        set._id,
+        setTitle:  set.setTitle,
+        deck: {
+          id:    set.deck._id,
+          title: set.deck.title
+        },
+        flashcards: set.flashcards   // array of { question, answer }
       });
+    } catch (err) {
+      console.error("Error fetching flashcard set:", err);
+      return res.status(500).json({ message: err.message });
+    }
+  };
+
+
+
+  exports.updateFlashcardSet = async (req, res) => {
+    const { setId }    = req.params;
+    const { setTitle } = req.body;
+    const userId = req.user.userId;
+
   
-      await newFlashcard.save();
+    if (!setTitle) {
+      return res.status(400).json({ message: "Missing setTitle" });
+    }
   
-      // Update the deck's flashcards array and updatedAt field
-      await Deck.findByIdAndUpdate(deck, {
-        $push: { flashcards: newFlashcard._id },
-        $set: { updatedAt: Date.now() },
-      });
+    try {
+      // 1) Find the set and populate its deck to check ownership
+      const set = await FlashcardSet.findById(setId).populate("deck", "user");
+      if (!set) {
+        return res.status(404).json({ message: "Flashcard set not found" });
+      }
+      if (set.deck.user.toString() !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
   
-      res.status(201).json({ message: "Flashcard created", flashcard: newFlashcard });
-    } catch (error) {
-      console.error("Error creating flashcard:", error);
-      res.status(500).json({ message: error.message });
+      // 2) Update the title and stamp updatedAt on both set & deck
+      set.setTitle = setTitle;
+      await set.save();
+  
+      await Deck.findByIdAndUpdate(set.deck._id, { updatedAt: Date.now() });
+  
+      res.json({ message: "Flashcard set renamed", flashcardSet: set });
+    } catch (err) {
+      console.error("Error renaming flashcard set:", err);
+      res.status(500).json({ message: err.message });
     }
   };
   
+  /**
+   * DELETE /flashcard-sets/:setId
+   */
+  exports.deleteFlashcardSet = async (req, res) => {
+    const { setId } = req.params;
+    const userId = req.user.userId;
+  
+    try {
+      // 1) Find the set and populate deck to check user
+      const set = await FlashcardSet.findById(setId).populate("deck", "user flashcardSets");
+      if (!set) {
+        return res.status(404).json({ message: "Flashcard set not found" });
+      }
+      if (set.deck.user.toString() !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+  
+      // 2) Remove the set document
+      await FlashcardSet.findByIdAndDelete(setId);
+  
+      // 3) Optionally remove from deck.flashcardSets array & update updatedAt
+      await Deck.findByIdAndUpdate(
+        set.deck._id,
+        {
+          $pull: { flashcardSets: setId },
+          $set:  { updatedAt: Date.now() }
+        },
+        { new: true }
+      );
+  
+      res.json({ message: "Flashcard set deleted" });
+    } catch (err) {
+      console.error("Error deleting flashcard set:", err);
+      res.status(500).json({ message: err.message });
+    }
+  };

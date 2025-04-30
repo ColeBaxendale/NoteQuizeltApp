@@ -21,6 +21,8 @@
 .deck-content {
   padding-left: 3rem;
   padding-right: 3rem;
+  display: flex;
+  justify-content: center;
   box-sizing: border-box;
 }
 
@@ -450,4 +452,26 @@
   }
   
 
+  .create-flashcard-set-btn{
+    width: 100%;
+    max-width: 500px;
+    height: 3rem;
+    background: var(--gradient-button);
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: .7rem;
+    background: var(--gradient-button);    
+    background-size: 110% 110%;
+    background-position: center;
+    color: white;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .create-flashcard-set-btn:hover {
+    box-shadow: 0 0 2.5px var(--text), 0 0 5px var(--text);
+    border: 1px solid transparent;
+}
   

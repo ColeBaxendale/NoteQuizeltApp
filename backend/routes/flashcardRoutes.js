@@ -5,7 +5,10 @@ const flashcardsController = require('../controllers/flashcardController');
 const authMiddleware = require('../config/authMiddleware');
 
 // Update flashcard by ID
-router.put('/:flashcardId', authMiddleware, flashcardsController.updateFlashcard);
-router.delete('/:flashcardId', authMiddleware, flashcardsController.deleteFlashcard);
-router.post("/add", authMiddleware, flashcardsController.createFlashcard);
+router.put('/:setId/:flashcardId', authMiddleware, flashcardsController.updateFlashcard);
+router.delete('/:setId/:flashcardId', authMiddleware, flashcardsController.deleteFlashcard);
+router.post("/:setId/add", authMiddleware, flashcardsController.createFlashcard);
+router.get("/:setId", authMiddleware, flashcardsController.getFlashcards);
+router.patch("/set/:setId", authMiddleware, flashcardsController.updateFlashcardSet);
+router.delete("/:setId", authMiddleware, flashcardsController.deleteFlashcardSet);
 module.exports = router;

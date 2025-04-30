@@ -4,14 +4,14 @@ import Swal from "sweetalert2";
 import wand from "../../assets/wand.png";
 import React, { useEffect, useState } from "react";
 import API from "../../utils/api.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Navbar from "../../components/navbar/navbar.js";
 
 const CreateFlashCards = () => {
+  const { deckId } = useParams();
   const [user, setUser] = useState(null);
-  const [notes, setNotes] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isExamEssentials, setIsExamEssentials] = useState(false);
@@ -19,9 +19,6 @@ const CreateFlashCards = () => {
 
   const navigate = useNavigate();
 
-  // Define limits (in characters)
-  const MAX_CHAR_FREE = 40000;
-  const MAX_CHAR_PREMIUM = 100000;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -65,53 +62,30 @@ const CreateFlashCards = () => {
   };
   
 
-  // Dynamically enforce character limit in the onChange handler
-  const handleNotesChange = (e) => {
-    let value = e.target.value;
-    if (user) {
-      const limit = user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE;
-      if (value.length > limit) {
-        value = value.substring(0, limit);
-      }
-    }
-    setNotes(value);
-  };
-
-  // Determine the current limit, default to free limit if user not loaded yet
-  const currentLimit = user ? (user.isPremium ? MAX_CHAR_PREMIUM : MAX_CHAR_FREE) : MAX_CHAR_FREE;
 
   const handleGenerateFlashcards = async () => {
     if (!title.trim()) {
       toast.error("Please enter a title for the study set.");
       return;
     }
-  
-    if (notes.trim().length < 100) {
-      toast.error("Your notes must be at least 100 characters long.");
-      return;
-    }
-  
-    if (notes.length > currentLimit) {
-      toast.error(`Your notes exceed the limit of ${currentLimit} characters.`);
-      return;
-    }
-  
     setIsLoading(true);
+
     try {
       const payload = {
-        title,
-        content: notes,
+        setTitle: title,
+        deckId,                         // ← include deckId
         settings: {
           examEssentials: isExamEssentials,
-          flashcardStyle: selectedStyle,
-        },
+          flashcardStyle: selectedStyle
+        }
       };
-      const response = await API.post("/deck/create-deck-flashcards", payload);
-      toast.success(response.data.message || `${title} created successfully`);
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error generating flashcards:", error);
-      toast.error(error.response?.data?.message || "An error occurred while generating flashcards.");
+
+      const { data } = await API.post("/deck/create-deck-flashcards", payload);
+      toast.success(data.message || `${title} created successfully`);
+      navigate(`/view-deck/${deckId}`);
+    } catch (err) {
+      console.error("Error generating flashcards:", err);
+      toast.error(err.response?.data?.message || "An error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +100,8 @@ const CreateFlashCards = () => {
           <div className="loading-content">
             {/* You can replace the below div with an actual spinner icon/image */}
             <div className="spinner"></div>
-            <p>Generating Your Flashcards, this may take a minute</p>
+            <p>Generating Your Flashcards.</p>
+            <p> Depending on amount of notes this could take a minute or two...</p>
           </div>
         </div>
       )}
@@ -137,18 +112,11 @@ const CreateFlashCards = () => {
             <div className="create-flashcard-content-container-left-title">
               <label className="create-flashcard-content-notes-label-text">Study Set Title</label>
               <input className="create-flashcard-content-notes-title" type="text" placeholder="Enter a title for this set." value={title} onChange={(e) => setTitle(e.target.value)} />
-              <label className="create-flashcard-content-notes-label-text">Input Notes</label>
 
-              <textarea className="create-flashcard-content-notes-textarea" value={notes} onChange={handleNotesChange} placeholder="Paste your notes here..." maxLength={currentLimit} />
               <div className={user && user.isPremium ? "create-flashcard-content-bottom" : "create-flashcard-content-bottom2"}>
                 {!user?.isPremium && <p className="create-flashcard-content-botttom-characters1">Free accounts are limited to 50 flashcards per set.</p>}
-                <p className={`create-flashcard-content-botttom-characters ${notes.length >= currentLimit ? "too-many" : ""}`}>
-                  {notes.length}/{currentLimit} Characters
-                </p>
               </div>
             </div>
-          </div>
-          <div className="create-flashcard-content-container-right">
             <div className="create-flashcard-content-container-left-title">
               <div className="flashcard-settings-header">
                 <label className="create-flashcard-content-notes-label-settings">Flashcard Settings</label>

@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const summarizationSchema = new Schema({
+  title: {             // optional, but handy
+    type: String,
+    default: 'Summary'
+  },
   summary: { 
     type: String, 
     required: true 
@@ -16,8 +20,12 @@ const summarizationSchema = new Schema({
     ref: 'Deck', 
     required: true 
   },
-
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
+
 
 const Summarization = mongoose.model('Summarization', summarizationSchema);
 module.exports = Summarization;

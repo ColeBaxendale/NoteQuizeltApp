@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="create-flashcard-nav">
         <div className="create-flashcard-nav-container">
           <img src={logo} alt="Logo" className="create-flashcard-nav-container-logo" />
-          <h1 className="create-flashcard-nav-container-text">NoteGenius</h1>
+          <a href="dashboard" className="create-flashcard-nav-container-text">NoteGenius</a>
 
         </div>
         <div className="create-flashcard-nav-container2">

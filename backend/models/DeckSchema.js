@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const deckSchema = new Schema({
   title: { 
@@ -9,44 +9,46 @@ const deckSchema = new Schema({
   content: { 
     type: String 
   },
-
   description: {
     type: String 
   },
-
   user: { 
     type: Schema.Types.ObjectId, 
     ref: 'User', 
     required: true 
   },
-  // References to related flashcards
+
+  // multiple flashcard sets
   flashcardSets: [{
     type: Schema.Types.ObjectId,
     ref: 'FlashcardSet'
   }],
-  // References to generated quizzes
-  quizzes: [{
+
+  // multiple quiz sets
+  quizSets: [{
     type: Schema.Types.ObjectId,
     ref: 'Quiz'
   }],
-  // References to generated summarizations
-  summarization: {
+
+  // multiple summarization sets
+  summarizations: [{
     type: Schema.Types.ObjectId,
     ref: 'Summarization'
-  },
+  }],
+
   updatedAt: { 
     type: Date, 
     default: Date.now 
   }
 });
 
+// keep titles unique per user
 deckSchema.index({ user: 1, title: 1 }, { unique: true });
 
-// Pre-save hook to update updatedAt on every save
+// auto‐stamp updates
 deckSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
-const Deck = mongoose.model('Deck', deckSchema);
-module.exports = Deck;
+module.exports = mongoose.model('Deck', deckSchema);
