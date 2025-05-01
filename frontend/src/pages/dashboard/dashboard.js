@@ -195,7 +195,12 @@ const Dashboard = () => {
                   ) : (
                     <h2 className="tempset-left-title">{deck.title}</h2>
                   )}
-                  <h2 className="tempset-left-text">{deck.description}</h2>
+                  <p className="tempset-time">
+                    {new Date(deck.updatedAt).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
                 </div>
 
                 <div className="tempset-right" onClick={(e) => e.stopPropagation()}>
@@ -295,12 +300,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   )}
-                  <p className="tempset-time">
-                    {new Date(deck.updatedAt).toLocaleString("en-US", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
-                  </p>
+
                 </div>
               </div>
             ))

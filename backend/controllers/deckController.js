@@ -170,6 +170,7 @@ exports.createFlashcardSet = async (req, res) => {
       length: generated.length, // satisfy required `length`
       flashcards: generated, // [{ question, answer }, …]
       deck: deckId,
+
     });
 
     // 4) Attach to deck and save
@@ -369,6 +370,7 @@ exports.getDeckById = async (req, res) => {
 
     return res.status(200).json({
       id: deck._id,
+      description: deck.description,
       title: deck.title,
       flashcardSets,
       summarization,

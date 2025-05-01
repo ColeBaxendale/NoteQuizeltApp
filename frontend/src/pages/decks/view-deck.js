@@ -21,6 +21,8 @@ const ViewDeck = () => {
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
 
   const [deckTitle, setDeckTitle] = useState("");
+  const [deckDescription, setDeckDescription] = useState("");
+
   const [flashcardSets, setFlashcardSets] = useState([]); // [{ id, setTitle, flashcardCount }, …]
   const [summaryMeta, setSummaryMeta] = useState(null);
   const [quizTitles, setQuizTitles] = useState([]); // [{ id, title }, …]
@@ -31,6 +33,7 @@ const ViewDeck = () => {
       try {
         const { data } = await API.get(`/deck/${deckId}`);
         setDeckTitle(data.title);
+        setDeckDescription(data.description);
 
         // map using `id` and `flashcardCount`, not `_id`/`length`
         setFlashcardSets(
@@ -148,6 +151,7 @@ const ViewDeck = () => {
             / {deckTitle} / {activeView}
           </span>
         </div>
+
   
         <div className="deck-tab-nav">
           {["Summary", "Flashcards", "Tests", "AI Tools"].map(tab => (

@@ -13,7 +13,7 @@ const MAX_CHARS_QUESTION = 600;
 const MAX_CHARS_ANSWER = 600;
 
 const TempFlashCard = () => {
-  const { setId }   = useParams();
+  const { setId } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [deck, setDeck] = useState(null);
@@ -24,12 +24,11 @@ const TempFlashCard = () => {
   const [editingCardId, setEditingCardId] = useState(null);
   const [editingBackup, setEditingBackup] = useState(null);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
-  const [deckTitle,     setDeckTitle]     = useState("");
-  const [setTitle,      setSetTitle]      = useState("");
+  const [deckTitle, setDeckTitle] = useState("");
+  const [setTitle, setSetTitle] = useState("");
 
   // Create a ref to attach to the currently edited card container
   const editingRef = useRef(null);
-
 
   const goBack = () => navigate(-1);
 
@@ -47,19 +46,16 @@ const TempFlashCard = () => {
   const handleEdit = async (index, field, value) => {
     // Save previous state for rollback
     const previousFlashcards = [...flashcards];
-  
+
     // Optimistically update UI
     const updated = [...flashcards];
     updated[index][field] = value;
     setFlashcards(updated);
-  
+
     // If this isn’t a brand-new card, persist the change
     if (!updated[index].isNew) {
       try {
-        await API.put(
-          `/flashcard/${setId}/${updated[index]._id}`, 
-          { [field]: value }
-        );
+        await API.put(`/flashcard/${setId}/${updated[index]._id}`, { [field]: value });
       } catch (error) {
         console.error("Error updating flashcard:", error);
         // Roll back on failure
@@ -68,7 +64,7 @@ const TempFlashCard = () => {
       }
     }
   };
-  
+
   const nextCard = () => {
     if (currentCardIndex < flashcards.length - 1) {
       setShowAnswer(false);
@@ -96,7 +92,6 @@ const TempFlashCard = () => {
       console.log(setId);
       console.log(flashcardId);
 
-      
       await API.delete(`/flashcard/${setId}/${flashcardId}`);
 
       console.log("Flashcard deleted");
@@ -198,8 +193,8 @@ const TempFlashCard = () => {
         // data.deck === { id, title }
         setDeck(data.deck);
         setDeckTitle(data.deck.title);
-        setSetTitle(data.setTitle)
-  
+        setSetTitle(data.setTitle);
+
         const cards = data.flashcards || [];
         setFlashcards(cards);
         setShuffledOrder([...Array(cards.length).keys()]);
@@ -208,40 +203,32 @@ const TempFlashCard = () => {
         navigate("/dashboard");
       }
     };
-  
+
     fetchFlashcardSet();
   }, [setId, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      const isInputFocused =
-        document.activeElement.tagName === "INPUT" ||
-        document.activeElement.tagName === "TEXTAREA" ||
-        document.activeElement.isContentEditable;
+      const isInputFocused = document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA" || document.activeElement.isContentEditable;
       if (isInputFocused) return;
-  
+
       if (e.key === "ArrowRight" && flashcards.length > 0) {
         setShowAnswer(false);
-        setCurrentCardIndex(idx =>
-          Math.min(idx + 1, flashcards.length - 1)
-        );
+        setCurrentCardIndex((idx) => Math.min(idx + 1, flashcards.length - 1));
       }
       if (e.key === "ArrowLeft") {
         setShowAnswer(false);
-        setCurrentCardIndex(idx =>
-          Math.max(idx - 1, 0)
-        );
+        setCurrentCardIndex((idx) => Math.max(idx - 1, 0));
       }
       if (e.key === " ") {
         e.preventDefault();
-        setShowAnswer(prev => !prev);
+        setShowAnswer((prev) => !prev);
       }
     };
-  
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [flashcards.length]);
-  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -287,150 +274,144 @@ const TempFlashCard = () => {
           <span className="breadcrumb-link" onClick={goBack}>
             <FaArrowLeft className="back-icon" /> {deckTitle}
           </span>
-          <span className="breadcrumb-current">
-              / Flashcards / {setTitle}
-          </span>
+          <span className="breadcrumb-current">/ Flashcards / {setTitle}</span>
         </div>
-
 
         <div className="deck-content">
-        <div className="flashcard-view">
-    {flashcards.length === 0 ? (
-      <button onClick={() => navigate("/create-flashcards", { state: { deckId: deck._id } })}>Create Flashcards for This Deck</button>
-    ) : (
-      <>
-        <div  key={currentCardIndex} className={`flashcard-flip-card`} onClick={() => setShowAnswer(!showAnswer)}>
-          <div className={`flashcard-flip-card-inner ${showAnswer ? "show-answer" : ""}`}>
-            <div className="flashcard-front">
-              <p>{currentCard.question}</p>
-              <div className="flashcard-hint">Click or press spacebar to reveal answer</div>
-            </div>
-            <div className="flashcard-back">
-              <p>{currentCard.answer}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flashcard-controls2">
-          <p className="card-counter">
-            {currentCardIndex + 1} of {flashcards.length}
-          </p>
-          <div className="controls-space">
-            <button className="arrow-button left" title="Previous Card" onClick={prevCard} disabled={currentCardIndex === 0}>
-              &#8592;
-            </button>
-            <button className="arrow-button right" title="Next Card" onClick={nextCard} disabled={currentCardIndex === flashcards.length - 1}>
-              &#8594;
-            </button>
-          </div>
-
-          <div className="flashcard-controls">
-            <button className="buttonNoGradient" onClick={shuffleFlashcards}>
-              Shuffle
-            </button>
-            <button className="buttonNoGradient" onClick={() => navigate("/create-test", { state: { deckId: deck._id } })}>
-              Create Test
-            </button>
-          </div>
-        </div>
-
-        <div className="answers-below">
-          <p className="all-cards">All Flashcards ({flashcards.length})</p>
-          {user.isPremium ? (
-            <button className="buttonGradient" onClick={handleAddFlashcard}>
-              Add Flashcard
-            </button>
-          ) : (
-            <button className="buttonGradient" disabled title="Upgrade to premium to add flashcards">
-              Add Flashcard
-            </button>
-          )}
-        </div>
-        <div className="flashcard-list">
-          {flashcards.map((card, index) => {
-            const isEditing = editingCardId === card._id;
-            return (
-              <div className={`flashcardtwo ${isEditing ? "editing-field" : ""}`} key={card._id} ref={isEditing ? editingRef : null}>
-                <div className="editable-flashcard">
-                  <p
-                    className="question"
-                    contentEditable={isEditing}
-                    suppressContentEditableWarning={true}
-                    onInput={(e) => {
-                      if (e.target.innerText.length > MAX_CHARS_QUESTION) {
-                        e.target.innerText = e.target.innerText.substring(0, MAX_CHARS_QUESTION);
-                      }
-                    }}
-                    onBlur={(e) => handleEdit(index, "question", e.target.innerText)}
-                  >
-                    {card.question}
-                  </p>
-                  <div className="stack-stuff">
-                    <p
-                      className="answer"
-                      contentEditable={isEditing}
-                      suppressContentEditableWarning={true}
-                      onInput={(e) => {
-                        if (e.target.innerText.length > MAX_CHARS_ANSWER) {
-                          e.target.innerText = e.target.innerText.substring(0, MAX_CHARS_ANSWER);
-                        }
-                      }}
-                      onBlur={(e) => handleEdit(index, "answer", e.target.innerText)}
-                    >
-                      {card.answer}
-                    </p>
-                    <div className="buttons-flashcard">
-                      {pendingDeleteId === card._id ? (
-                        <>
-                          <p className="editing">Are you sure you want to delete?</p>
-                          <button className="icon-button confirm-button" title="Confirm Delete" onClick={() => handleDeleteConfirm(card._id)}>
-                            <FontAwesomeIcon icon={faCheck} className="icon" />
-                          </button>
-                          <button className="icon-button cancel-button" title="Cancel Delete" onClick={() => setPendingDeleteId(null)}>
-                            <FontAwesomeIcon icon={faX} className="icon" />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {isEditing ? (
-                            <>
-                              <p className="editing">Edit Mode | Max 600 Characters</p>
-                              <button className="icon-button done-button" title="Confirm Edit" onClick={handleEditConfirm}>
-                                <FontAwesomeIcon icon={faCheck} className="icon" />
-                              </button>
-                              <button className="icon-button cancel-edit-button" title="Cancel Edit" onClick={() => handleEditCancel(index)}>
-                                <FontAwesomeIcon icon={faX} className="icon" />
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button className="icon-button" title="Edit Flashcard" onClick={() => startEditing(card)}>
-                                <FontAwesomeIcon icon={faEdit} className="icon" />
-                              </button>
-                              <button className="icon-button" title="Delete Flashcard" onClick={() => setPendingDeleteId(card._id)}>
-                                <FontAwesomeIcon icon={faTrashAlt} className="icon" />
-                              </button>
-                            </>
-                          )}
-                        </>
-                      )}
+          <div className="flashcard-view">
+            {flashcards.length === 0 ? (
+              <button onClick={() => navigate("/create-flashcards", { state: { deckId: deck._id } })}>Create Flashcards for This Deck</button>
+            ) : (
+              <>
+                <div key={currentCardIndex} className={`flashcard-flip-card`} onClick={() => setShowAnswer(!showAnswer)}>
+                  <div className={`flashcard-flip-card-inner ${showAnswer ? "show-answer" : ""}`}>
+                    <div className="flashcard-front">
+                      <p>{currentCard.question}</p>
+                      <div className="flashcard-hint">Click or press spacebar to reveal answer</div>
+                    </div>
+                    <div className="flashcard-back">
+                      <p>{currentCard.answer}</p>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </>
-    )}
-  </div>
-        </div>
 
+                <div className="flashcard-controls2">
+                  <p className="card-counter">
+                    {currentCardIndex + 1} of {flashcards.length}
+                  </p>
+                  <div className="controls-space">
+                    <button className="arrow-button left" title="Previous Card" onClick={prevCard} disabled={currentCardIndex === 0}>
+                      &#8592;
+                    </button>
+                    <button className="arrow-button right" title="Next Card" onClick={nextCard} disabled={currentCardIndex === flashcards.length - 1}>
+                      &#8594;
+                    </button>
+                  </div>
 
+                  <div className="flashcard-controls">
+                    <button className="buttonNoGradient" onClick={shuffleFlashcards}>
+                      Shuffle
+                    </button>
+                    <button className="buttonNoGradient" onClick={() => navigate("/create-test", { state: { deckId: deck._id } })}>
+                      Create Test
+                    </button>
+                  </div>
+                </div>
+
+                <div className="answers-below">
+                  <p className="all-cards">All Flashcards ({flashcards.length})</p>
+                  {user.isPremium ? (
+                    <button className="buttonGradient" onClick={handleAddFlashcard}>
+                      Add Flashcard
+                    </button>
+                  ) : (
+                    <button className="buttonGradient" disabled title="Upgrade to premium to add flashcards">
+                      Add Flashcard
+                    </button>
+                  )}
+                </div>
+                <div className="flashcard-list">
+                  {flashcards.map((card, index) => {
+                    const isEditing = editingCardId === card._id;
+                    return (
+                      <div className={`flashcardtwo ${isEditing ? "editing-field" : ""}`} key={card._id} ref={isEditing ? editingRef : null}>
+                        <div className="editable-flashcard">
+                          <p
+                            className="question"
+                            contentEditable={isEditing}
+                            suppressContentEditableWarning={true}
+                            onInput={(e) => {
+                              if (e.target.innerText.length > MAX_CHARS_QUESTION) {
+                                e.target.innerText = e.target.innerText.substring(0, MAX_CHARS_QUESTION);
+                              }
+                            }}
+                            onBlur={(e) => handleEdit(index, "question", e.target.innerText)}
+                          >
+                            {card.question}
+                          </p>
+                          <div className="stack-stuff">
+                            <p
+                              className="answer"
+                              contentEditable={isEditing}
+                              suppressContentEditableWarning={true}
+                              onInput={(e) => {
+                                if (e.target.innerText.length > MAX_CHARS_ANSWER) {
+                                  e.target.innerText = e.target.innerText.substring(0, MAX_CHARS_ANSWER);
+                                }
+                              }}
+                              onBlur={(e) => handleEdit(index, "answer", e.target.innerText)}
+                            >
+                              {card.answer}
+                            </p>
+                            <div className="buttons-flashcard">
+                              {pendingDeleteId === card._id ? (
+                                <>
+                                  <p className="editing">Are you sure you want to delete?</p>
+                                  <button className="icon-button confirm-button" title="Confirm Delete" onClick={() => handleDeleteConfirm(card._id)}>
+                                    <FontAwesomeIcon icon={faCheck} className="icon" />
+                                  </button>
+                                  <button className="icon-button cancel-button" title="Cancel Delete" onClick={() => setPendingDeleteId(null)}>
+                                    <FontAwesomeIcon icon={faX} className="icon" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  {isEditing ? (
+                                    <>
+                                      <p className="editing">Edit Mode | Max 600 Characters</p>
+                                      <button className="icon-button done-button" title="Confirm Edit" onClick={handleEditConfirm}>
+                                        <FontAwesomeIcon icon={faCheck} className="icon" />
+                                      </button>
+                                      <button className="icon-button cancel-edit-button" title="Cancel Edit" onClick={() => handleEditCancel(index)}>
+                                        <FontAwesomeIcon icon={faX} className="icon" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button className="icon-button" title="Edit Flashcard" onClick={() => startEditing(card)}>
+                                        <FontAwesomeIcon icon={faEdit} className="icon" />
+                                      </button>
+                                      <button className="icon-button" title="Delete Flashcard" onClick={() => setPendingDeleteId(card._id)}>
+                                        <FontAwesomeIcon icon={faTrashAlt} className="icon" />
+                                      </button>
+                                    </>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default TempFlashCard;
-
